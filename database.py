@@ -24,6 +24,32 @@ class User(Model):
         database = DB
         table_nam = 'users'
 
+class Company(Model):
+    id = AutoField()
+    name = CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        database = DB
+        table_nam = 'companies'
+
+
+class Discount(Model):
+    company = ForeignKeyField(Company, backref='discounts')
+    percentage = FloatField()
+    start_date = DateTimeField()
+    end_date = DateTimeField()
+
+    def __str__(self):
+        return self.company
+    
+    class Meta:
+        database = DB
+        table_nam = 'discounts'
+
+
 def create_database(nombre_base_de_datos):
 
     config = {

@@ -47,7 +47,7 @@ async def update_user(user_update: str, usuario_update: UsuarioBase):
 
 async def delete_user(user_delete, password_delete):
 
-    user = User.select().where(User.name == user_delete && User.password == password_delete ).first()
+    user = User.select().where((User.name == user_delete) & (User.password == password_delete)).first()
 
     if user:
         user.delete_instance()

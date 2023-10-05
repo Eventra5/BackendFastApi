@@ -2,13 +2,14 @@ from fastapi import FastAPI
 from fastapi import HTTPException
 from datetime import datetime
 
-from database import User
+from database import User, Company
 from database import DB as connection 
 from database import create_database
 
-from schemas import UsuarioBase, UsuarioCreate, Usuario  
+from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate
 
 import Pages.users as user_page
+import Pages.companys as company_page
 
 app = FastAPI(title="Estacionamiento", description="Software para el uso y administracion de estacionamientos", version='1.0.1')
 
@@ -23,6 +24,7 @@ def startup():
         connection.connect()
 
     connection.create_tables([User])
+    connection.create_tables([Company])
     
 @app.on_event('shutdown')
 def shutdown():
@@ -55,6 +57,9 @@ async def delete_user(user_delete,password_delete):
     return await user_page.delete_user(user_delete,password_delete)
 #endregion
 
+@app.post("/company/", response_model=CompanyResponse)
+async def create_company(company_request: CompanyCreate):
+    return await company_page.create_company(company_request)
 
                 
 #env\scripts\activate.bat
