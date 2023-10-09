@@ -27,9 +27,11 @@ class CompanyCreate(CompanyBase):
     pass
 
 class CompanyResponse(BaseModel):
-    id: int
     name: str
 
+#endregion
+
+#region Descuentos
 class DiscountBase(BaseModel):
     percentage: float = Field(..., gt=0, le=100)  # Porcentaje entre 0 y 100
     start_date: datetime
@@ -39,4 +41,3 @@ class DiscountCreate(DiscountBase):
     pass
 
 #endregion
-

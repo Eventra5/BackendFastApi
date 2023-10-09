@@ -35,7 +35,6 @@ class Company(Model):
         database = DB
         table_nam = 'companies'
 
-
 class Discount(Model):
     company = ForeignKeyField(Company, backref='discounts')
     percentage = FloatField()
