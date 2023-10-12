@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+from datetime import date, datetime
 
 #region Usuarios
 class UsuarioBase(BaseModel):
@@ -40,4 +40,33 @@ class DiscountBase(BaseModel):
 class DiscountCreate(DiscountBase):
     pass
 
+#endregion
+
+#region clientes
+class CustomerBase(BaseModel):
+    name: str
+    last_name: str
+    email: EmailStr
+
+
+class CustomerCreate(CustomerBase):
+    pass
+
+class Customer(CustomerBase):
+    id: int
+
+#endregion
+
+#region clientes con descuento
+
+class CustomerBase_company(BaseModel):
+    persona_id: int
+    empresa_id: int
+    descuento_id: int
+
+class CustomerCompanyCreate(CustomerBase_company):
+    pass
+
+class CustomerCompany(CustomerBase_company):
+    id: int
 #endregion

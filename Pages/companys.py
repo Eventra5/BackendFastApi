@@ -52,4 +52,3 @@ async def delete_company(company_name):
         # Maneja cualquier otro error que pueda ocurrir durante la transacción
         raise HTTPException(status_code=500, detail="Error interno del servidor")
 
-

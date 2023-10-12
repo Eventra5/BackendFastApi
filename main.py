@@ -3,14 +3,15 @@ from fastapi import HTTPException
 from datetime import datetime
 
 from database import DB as connection 
-from database import User, Company, Discount
+from database import User, Company, Discount, Customer, Customer_company
 from database import create_database
 
-from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate, DiscountBase, DiscountCreate
+from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate, DiscountBase, DiscountCreate, CustomerCreate
 
 import Pages.users as user_page
 import Pages.companys as company_page
 import Pages.discounts as discounts_page
+import Pages.customers as customer_page
 
 app = FastAPI(title="Estacionamiento", description="Software para el uso y administracion de estacionamientos", version='1.0.1')
 
@@ -27,6 +28,9 @@ def startup():
     connection.create_tables([User])
     connection.create_tables([Company])
     connection.create_tables([Discount])
+    connection.create_tables([Customer])
+    connection.create_tables([Customer_company])
+
 
 @app.on_event('shutdown')
 def shutdown():
@@ -85,15 +89,15 @@ async def delete_company(company_name):
 async def get_discount(discount_id: str):
     return await discounts_page.get_discount(discount_id)
 
-@app.get("/discount/{company}")
-async def get_discounts_by_company_name(company_get: str):
-    return await discounts_page.get_discounts_by_company_name(company_get)
+@app.get("/discounts/{company_name}")
+async def get_discount_name(company_name: str):
+    return await discounts_page.get_discount_name(company_name)
 
-@app.post("/discount/", response_model=DiscountBase)
-async def create_discount(discount: DiscountCreate, company_id: int):
-    return await discounts_page.create_discount(discount, company_id)
+@app.post("/discount/{company_name}", response_model=DiscountBase)
+async def create_discount(discount: DiscountCreate, company_name: str):
+    return await discounts_page.create_discount(discount, company_name)
 
-@app.delete('/discount/{discount_id}')
+@app.delete("/discount/{discount_id}")
 async def delete_discount(discount_id):
     return await discounts_page.delete_discount(discount_id)
 #endregion
@@ -101,8 +105,29 @@ async def delete_discount(discount_id):
 #Peticiones para los clientes
 #region client
 
+@app.get("/customer_company/{customer_email}")
+async def get_customer(customer_email: str):
+    return await customer_page.get_customer_companies(customer_email)
+
+@app.get("/customers")
+async def get_all_customers():
+    return await customer_page.get_all_customers()
+
+@app.post("/customer/{company_name}/{discount_id}")
+async def create_customer(request_customer: CustomerCreate, company_name, discount_id):
+    return await customer_page.create_customer(request_customer, company_name, discount_id)
+
+@app.delete("/customer/{customer_email}")
+async def delete_customer(customer_email: str):
+    return await customer_page.delete_customer(customer_email)
+#endregion
+
+#Peticiones para los Qr personalizados
+#region Qr
 
 #endregion
+
+
 
 #env\scripts\activate.bat
 #uvicorn main:app --reload

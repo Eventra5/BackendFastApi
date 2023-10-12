@@ -1,4 +1,5 @@
 from peewee import *
+from datetime import datetime
 import mysql.connector
 
 DB = MySQLDatabase(
@@ -22,31 +23,59 @@ class User(Model):
     
     class Meta:
         database = DB
-        table_nam = 'users'
+        table_name = 'users'
 
 class Company(Model):
-    id = AutoField()
-    name = CharField(max_length=50)
+    id = AutoField(primary_key=True)
+    name = CharField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
     
     class Meta:
         database = DB
-        table_nam = 'companies'
+        table_name = 'companies'
 
 class Discount(Model):
-    company = ForeignKeyField(Company, backref='discounts')
+    id = AutoField()
+    company = ForeignKeyField(Company, backref='discount_company', column_name='company_name', to_field='name')
     percentage = FloatField()
-    start_date = DateTimeField()
-    end_date = DateTimeField()
+    start_date = DateField()
+    end_date = DateField()
 
     def __str__(self):
         return self.company
     
     class Meta:
         database = DB
-        table_nam = 'discounts'
+        table_name = 'discounts'
+
+
+class Customer(Model):
+    id = AutoField()
+    name = CharField(max_length=100)
+    last_name = CharField(max_length=100)
+    email = CharField(max_length=100, unique=True)
+
+
+    def __str__(self):
+        return f"{self.nombre} {self.apellido}"
+
+    class Meta:
+        database = DB
+        table_name = 'customers'
+
+class Customer_company(Model):
+    
+    customer = ForeignKeyField(Customer, backref='customer_companies', column_name='customer_email', to_field='email')
+    company = ForeignKeyField(Company, backref='company_customers', column_name='company_name', to_field='name')
+    descuento = ForeignKeyField(Discount)
+
+    class Meta:
+        database = DB
+        table_name = 'customer_company'
+
+
 
 
 def create_database(nombre_base_de_datos):

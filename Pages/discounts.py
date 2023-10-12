@@ -9,7 +9,6 @@ from fastapi import HTTPException
 async def get_discount(discount_id: str):
 
     try:
-
         # Utiliza la relación 'discounts' para obtener los descuentos relacionados
         discounts = Discount.select().where(Discount.id == discount_id)
 
@@ -23,7 +22,8 @@ async def get_discount(discount_id: str):
             # Maneja cualquier otro error que pueda ocurrir
         raise HTTPException(status_code=500, detail="Error interno del servidor.")
     
-async def get_discounts_by_company_name(company_name):
+async def get_discount_name(company_name: str):
+
     try:
         # Encuentra la empresa por su nombre
         company = Company.get(Company.name == company_name)
@@ -41,15 +41,16 @@ async def get_discounts_by_company_name(company_name):
         # Maneja cualquier otro error que pueda ocurrir
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     
-async def create_discount(discount: DiscountCreate, company_id: int):
+async def create_discount(discount: DiscountCreate, company_name: str):
     # Validar los datos de entrada utilizando Pydantic
     discount_data = discount.dict()
     
-    # Obtener la empresa asociada al descuento
-    company = Company.get_or_none(id=company_id)
-    if not company:
+    try:
+        # Obtener la empresa asociada al descuento por nombre
+        company = Company.get(Company.name == company_name)
+    except Company.DoesNotExist:
         raise HTTPException(status_code=404, detail="Empresa no encontrada")
-    
+
     # Crear el descuento en la base de datos y asociarlo a la empresa
     new_discount = Discount.create(company=company, **discount_data)
     return new_discount
