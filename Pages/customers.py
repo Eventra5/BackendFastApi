@@ -1,13 +1,9 @@
 from MySQLdb import IntegrityError, OperationalError
-from database import Customer, Customer_company, Company, Discount, DB
+from database import Customer, Customer_discount, Company, Discount, DB
 
 from peewee import DoesNotExist
 
-from schemas import CustomerCompanyCreate, CustomerCreate
-
 from fastapi import HTTPException
-
-import Qr.Qr_personalized as Qr_personalized_page
 
 import Email.Enviar_Qr as Enviar_Qr
 

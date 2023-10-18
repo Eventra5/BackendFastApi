@@ -8,7 +8,7 @@ from peewee import DoesNotExist
 
 from fastapi import HTTPException
 
-from database import Customer_company, Customer, Company, Discount
+from database import Customer_discount, Customer, Company, Discount
 
 import Qr.Qr_personalized as Qr_personalized_page
 

@@ -1,3 +1,8 @@
+import bcrypt
+import random
+
+from Passwords.password import hashed_password
+
 from database import User
 
 from schemas import UsuarioCreate, UsuarioBase
@@ -5,7 +10,41 @@ from schemas import UsuarioCreate, UsuarioBase
 from fastapi import HTTPException
 
 
+async def validate_user(username: str, password: str):
+
+
+    if User.select().where(User.email == username).exists():
+        raise HTTPException(status_code=400, detail="El usuario no existe")
+    
+    usuario = User.get(User.username == username)
+    salt = usuario.salt
+
+    hashed_password_usuario = bcrypt.hashpw(password.encode('utf-8'), salt.encode('utf-8'))
+    hashed_password_usuario = (hashed_password_usuario[:10])
+
+
+    # Compara el hash generado con el hash almacenado en la tabla
+    if hashed_password_usuario == usuario.password.encode('utf-8'):
+        return True  # La contraseña es válida
+    else:
+        return False  # La contraseña no es válida
+
+def create_username (name: str, last_name:str):
+
+    username_base = (name[:2] + last_name[:2].lower())
+    id_random = random.randint(0,9) * 10 + random.randint(0,9)
+
+    username = f'{username_base}{id_random}'
+
+    while User.select().where(User.username == username).exists():
+
+        id_random = random.randint(0,9) * 10 + random.randint(0,9)
+        username = f'{username_base}{id_random}'
+    
+    return username
+
 async def get_user(user_get: str):
+
     user = User.get_or_none(User.name == user_get)
 
     if user:
@@ -23,11 +62,18 @@ async def create_user(user_request: UsuarioCreate):
     if User.select().where(User.email == user_request.email).exists():
         raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
 
+    username = create_username(user_request.name, user_request.last_name)
+
+    password_hashed, salt = hashed_password(user_request.password)
+
     user = User.create(
+        username = username,
         name = user_request.name,
+        last_name = user_request.last_name,
         password = user_request.password,
         rol = user_request.rol,
-        email = user_request.email
+        email = user_request.email,
+        salt = salt
     )
 
     return 'Usuario creado con exito'

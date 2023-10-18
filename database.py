@@ -1,5 +1,8 @@
 from peewee import *
 from datetime import datetime
+
+from peewee import DoesNotExist
+
 import mysql.connector
 
 DB = MySQLDatabase(
@@ -12,11 +15,14 @@ DB = MySQLDatabase(
 
 class User(Model):
     id = AutoField()
-    name = CharField(max_length=50)
+    username = CharField(max_length=6, unique= True)
     password = CharField(max_length=10, unique=True)
+    name = CharField()
+    last_name = CharField()
+    email = CharField()
+    salt = CharField() 
     rol = CharField(max_length=5)
-    email = CharField(max_length=100, unique=True)
-    fecha_de_registro = DateTimeField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+    fecha_de_registro = DateField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
 
     def __str__(self):
         return self.name
@@ -40,8 +46,6 @@ class Discount(Model):
     id = AutoField()
     company = ForeignKeyField(Company, backref='discount_company', column_name='company_name', to_field='name')
     percentage = FloatField()
-    start_date = DateField()
-    end_date = DateField()
 
     def __str__(self):
         return self.company
@@ -49,7 +53,6 @@ class Discount(Model):
     class Meta:
         database = DB
         table_name = 'discounts'
-
 
 class Customer(Model):
     id = AutoField()
@@ -65,15 +68,37 @@ class Customer(Model):
         database = DB
         table_name = 'customers'
 
-class Customer_company(Model):
+class Customer_discount(Model):
     
     customer = ForeignKeyField(Customer, backref='customer_companies', column_name='customer_email', to_field='email')
     company = ForeignKeyField(Company, backref='company_customers', column_name='company_name', to_field='name')
     descuento = ForeignKeyField(Discount)
+    fecha_inicio = DateField()
+    fecha_fin = DateField()
 
     class Meta:
         database = DB
-        table_name = 'customer_company'
+        table_name = 'customer_discount'
+
+# Define el modelo de "abrir caja"
+class AperturaCaja(Model):
+    fecha = DateTimeField()
+    cantidad_inicial = FloatField()
+    usuario_apertura = ForeignKeyField(User, backref='aperturas_de_caja', column_name='opening_user', to_field='username')
+    
+    class Meta:
+        database = DB
+
+# Define el modelo de "cierre de caja"
+class CierreCaja(Model):
+    fecha = DateTimeField()
+    cantidad_final = FloatField()
+    diferencia = FloatField()
+    usuario_cierre = ForeignKeyField(User, backref='cierres_de_caja', column_name='close_user', to_field='name')
+    apertura_caja = ForeignKeyField(AperturaCaja, backref='cierres_de_caja', null=True)  # Clave foránea que referencia la apertura de caja
+
+    class Meta:
+        database = DB
 
 
 

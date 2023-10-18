@@ -1,8 +1,9 @@
 import bcrypt
 
-# Función para hashear una contraseña
-def hash_password(password: str) -> str:
-
+def hashed_password(contraseña):
+    # Genera un salt aleatorio
     salt = bcrypt.gensalt()
-    hashed_password = bcrypt.hashpw(password.encode(), salt)
-    return hashed_password.decode()
+    # Hashea la contraseña con el salt
+    hashed_password = bcrypt.hashpw(contraseña.encode('utf-8'), salt)
+    # Devuelve el hash y el salt como cadena
+    return hashed_password, salt

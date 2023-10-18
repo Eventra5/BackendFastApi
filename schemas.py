@@ -4,6 +4,7 @@ from datetime import date, datetime
 #region Usuarios
 class UsuarioBase(BaseModel):
     name: str
+    last_name:str
     rol: str
     email: EmailStr
 
@@ -12,10 +13,9 @@ class UsuarioCreate(UsuarioBase):
     
 class Usuario(UsuarioBase):
     id: int
+    username: str
+    salt: str
     fecha_registro: str
-
-class updatepass(BaseModel):
-    password: str
 
 #endregion
 
@@ -70,3 +70,19 @@ class CustomerCompanyCreate(CustomerBase_company):
 class CustomerCompany(CustomerBase_company):
     id: int
 #endregion
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+#region Abrir caja
+
+class AbrirCajaBase(BaseModel):
+    fecha: datetime
+    cantidad_inicial: float
+
+class CrearCaja(AbrirCajaBase):
+    pass
+
+#endregion
+
