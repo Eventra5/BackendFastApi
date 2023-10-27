@@ -50,20 +50,6 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 async def login(request_login: OAuth2PasswordRequestForm = Depends()):
     return await login_page.login_user(request_login)
     
-
-@app.get("/protected")
-async def protected_routed(current_user: str = Depends(oauth2_scheme)):
-    # La función de la ruta protegida solo se ejecuta si el token es válido
-    # current_user contiene el usuario autenticado (token JWT)
-    return {"message": "You have access to this protected route!"}
-
-@app.get("/protectef")
-async def protected_routed(current_user: str = Depends(oauth2_scheme)):
-    # La función de la ruta protegida solo se ejecuta si el token es válido
-    # current_user contiene el usuario autenticado (token JWT)
-    return {"message": "You have access to this protected route!"}
-
-
 #endregion
 
 
@@ -153,11 +139,6 @@ async def create_customer(request_customer: CustomerCreate, company_name, discou
 async def delete_customer(customer_email: str):
     return await customer_page.delete_customer(customer_email)
 #endregion
-
-
-#endregion
-
-
 
 #env\scripts\activate.bat
 #uvicorn main:app --reload
