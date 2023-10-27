@@ -71,18 +71,29 @@ class CustomerCompany(CustomerBase_company):
     id: int
 #endregion
 
+#region Login
 class UserLogin(BaseModel):
     username: str
     password: str
 
+#endregion
+
 #region Abrir caja
 
 class AbrirCajaBase(BaseModel):
-    fecha: datetime
     cantidad_inicial: float
+    username: str
+    fecha: datetime
+
 
 class CrearCaja(AbrirCajaBase):
     pass
+
+
+class TransaccionCreate(BaseModel):
+    transaccion: str
+    monto: float
+    username: str
 
 #endregion
 

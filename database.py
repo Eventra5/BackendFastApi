@@ -82,25 +82,37 @@ class Customer_discount(Model):
 
 # Define el modelo de "abrir caja"
 class AperturaCaja(Model):
-    fecha = DateTimeField()
+    id = AutoField()
     cantidad_inicial = FloatField()
-    usuario_apertura = ForeignKeyField(User, backref='aperturas_de_caja', column_name='opening_user', to_field='username')
+    usuario_apertura = ForeignKeyField(User, backref='apertura_de_caja', column_name='usuario_apertura', to_field='username')
+    fecha = DateTimeField()
+    estado = BooleanField(default=True)
     
     class Meta:
         database = DB
 
 # Define el modelo de "cierre de caja"
 class CierreCaja(Model):
-    fecha = DateTimeField()
+    id = AutoField()
     cantidad_final = FloatField()
     diferencia = FloatField()
-    usuario_cierre = ForeignKeyField(User, backref='cierres_de_caja', column_name='close_user', to_field='name')
-    apertura_caja = ForeignKeyField(AperturaCaja, backref='cierres_de_caja', null=True)  # Clave foránea que referencia la apertura de caja
+    usuario_cierre = ForeignKeyField(User, backref='cierres_de_caja', column_name='usuario_cierre', to_field='username')
+    apertura_caja = ForeignKeyField(AperturaCaja, backref='cierres_de_caja', null=True)
+    fecha = DateTimeField()
 
     class Meta:
         database = DB
 
+class Transacciones(Model):
 
+    transaccion = CharField()
+    monto = FloatField()
+    fecha = DateTimeField()
+    user = ForeignKeyField(User, backref='usuario_transaccion', column_name='user', to_field='username')
+    apertura_caja = ForeignKeyField(AperturaCaja, backref='transacciones', column_name='apertura_id')
+
+    class Meta:
+        database = DB
 
 
 def create_database(nombre_base_de_datos):
