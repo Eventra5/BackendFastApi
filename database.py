@@ -90,6 +90,8 @@ class AperturaCaja(Model):
     
     class Meta:
         database = DB
+        table_name = 'open box'
+
 
 # Define el modelo de "cierre de caja"
 class CierreCaja(Model):
@@ -102,6 +104,8 @@ class CierreCaja(Model):
 
     class Meta:
         database = DB
+        table_name = 'close box'
+
 
 class Transacciones(Model):
 
@@ -113,6 +117,28 @@ class Transacciones(Model):
 
     class Meta:
         database = DB
+        table_name = 'transacciones'
+
+
+class Plan_fraccion(Model):
+    id = AutoField()
+    cobro_base = CharField()
+    cobro_hora = FloatField()
+
+    class Meta:
+        database = DB
+        table_name = 'plan fraccion'
+
+
+class Plan_x_hora(Model):
+    id = AutoField()
+    cobro_base = CharField()
+    cobro_hora = FloatField()
+    
+    class Meta:
+        database = DB
+        table_name = 'plan hora'
+
 
 
 def create_database(nombre_base_de_datos):

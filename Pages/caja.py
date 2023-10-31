@@ -95,3 +95,36 @@ def crear_transaccion(transaccion_data):
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+def corbro_x_hora(fecha_expedicion):
+
+    fecha_expedicion = '2023-10-28 11:01:01'
+
+    try:
+        # Convertir la fecha de expedición en un objeto datetime
+        fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
+
+        # Obtener la hora actual del sistema
+        fecha_fin = datetime.now()
+
+        # Calcular la diferencia en horas y minutos entre la fecha de expedición y la fecha de fin
+        diferencia = fecha_fin - fecha_expedicion
+
+        # Calcular el costo basado en la tarifa de $20 por la primera hora
+        costo = 20
+
+
+        print(fecha_expedicion)
+        print(fecha_fin)
+        print(diferencia)
+
+
+        # Si la diferencia es mayor que una hora, agregar $10 por cada hora adicional
+        if diferencia > timedelta(hours=1):
+            horas_adicionales = (diferencia.total_seconds() - 3600) / 3600
+            costo += 10 * horas_adicionales
+
+        return {"costo": costo}
+    except ValueError:
+        return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}

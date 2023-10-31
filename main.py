@@ -156,14 +156,17 @@ async def abrir_caja(request_caja: AbrirCajaBase):
 async def cerrar_caja(username: str):
     return await caja_page.cerrar_caja(username)
 
-
-@app.post("/transacciones/", tags=["Caja"])
-async def transacciones(cierre_id):
-    return caja_page.transacciones(cierre_id)
-
 @app.post("/transaccion/", tags=["Caja"])
 async def transaccion(transaccion_data: TransaccionCreate):
     return caja_page.crear_transaccion(transaccion_data)
+
+@app.post("/num-transacciones/", tags=["Caja"])
+async def transacciones(cierre_id):
+    return caja_page.num_transacciones(cierre_id)
+
+@app.post("/cobro-hora/", tags=["Caja"])
+async def cobro_hora(fecha_expedicion: str):
+    return caja_page.corbro_x_hora(fecha_expedicion)
 
 #endregion 
 
