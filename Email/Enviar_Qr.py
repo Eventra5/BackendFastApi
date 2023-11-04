@@ -14,7 +14,7 @@ import Qr.Qr_personalized as Qr_personalized_page
 
 def data_customer(customer_email):
     try:
-        customer_companies = Customer_company.select().where(Customer_company.customer_email == customer_email)
+        customer_discount = Customer_discount.select().where(Customer_discount.customer_email == customer_email)
 
         # Obtiene los datos del cliente desde la base de datos
         customer = Customer.get(Customer.email == customer_email)
@@ -23,7 +23,7 @@ def data_customer(customer_email):
 
 
         # Obtiene datos de la empresa y el descuento desde la base de datos
-        customer_company = customer_companies.get()  # Obtiene el primer registro de la consulta
+        customer_company = customer_discount.get()  # Obtiene el primer registro de la consulta
         company = Company.get(Company.name == customer_company.company_name)    
 
         discount = Discount.get(Discount.id == customer_company.descuento_id)
@@ -32,7 +32,7 @@ def data_customer(customer_email):
         data = f"""Nombre: {nombre} Apellido: {apellido}\n
         ID Empresa: {company.id} Empresa: {company.name}\n
         ID Descuento: {discount.id}Descuento: {discount.percentage}\n%
-        Fecha de inicio {discount.start_date} Fecha de vencimiento {discount.end_date}"""
+        Fecha de inicio {customer_company.fecha_inicio} Fecha de vencimiento {customer_company.fecha_fin}"""
 
         return data
 

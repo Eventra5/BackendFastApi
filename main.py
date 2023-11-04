@@ -2,10 +2,12 @@ from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
-from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones
+from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Plan_fraccion, Plan_x_hora, Planes_cobro
 from database import create_database
 
-from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate, DiscountBase, DiscountCreate, CustomerCreate, AbrirCajaBase, TransaccionCreate
+from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate, DiscountBase, DiscountCreate, CustomerCreate, AbrirCajaBase, TransaccionCreate, PlanCobroCreate, PlanesCreate
+from schemas import PlanCobroBase, Cobro
+
 
 import Pages.users as user_page
 import Pages.companys as company_page
@@ -13,6 +15,8 @@ import Pages.discounts as discounts_page
 import Pages.customers as customer_page
 import Pages.login as login_page
 import Pages.caja as caja_page
+import Pages.planes_cobro as plan_page
+import Pages.p_cobros as cobros_page
 
 
 app = FastAPI(title="Estacionamiento", description="Software para el uso y administracion de estacionamientos", version='1.0.1')
@@ -35,8 +39,10 @@ def startup():
     connection.create_tables([AperturaCaja])
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
-
-
+    connection.create_tables([Planes_cobro])
+    connection.create_tables([Plan_fraccion])
+    connection.create_tables([Plan_x_hora])
+    
 @app.on_event('shutdown')
 def shutdown():
 
@@ -87,7 +93,7 @@ async def delete_user(user_delete,password_delete):
 
 #Peticiones para las empresas
 #region companies
-@app.get("/company/{company_get}", tags=["Company"])
+@app.get("/company/", tags=["Company"])
 async def get_company(company_get: str):
     return await company_page.get_company(company_get)
 
@@ -111,11 +117,11 @@ async def delete_company(company_name):
 async def get_discount(discount_id: str):
     return await discounts_page.get_discount(discount_id)
 
-@app.get("/discounts/{company_name}", tags=["Discount"])
+@app.get("/discounts_company/", tags=["Discount"])
 async def get_discount_name(company_name: str):
     return await discounts_page.get_discount_name(company_name)
 
-@app.post("/discount/{company_name}", response_model=DiscountBase, tags=["Discount"])
+@app.post("/discount/", response_model=DiscountBase, tags=["Discount"])
 async def create_discount(discount: DiscountCreate, company_name: str):
     return await discounts_page.create_discount(discount, company_name)
 
@@ -165,10 +171,48 @@ async def transacciones(cierre_id):
     return caja_page.num_transacciones(cierre_id)
 
 @app.post("/cobro-hora/", tags=["Caja"])
-async def cobro_hora(fecha_expedicion: str):
-    return caja_page.corbro_x_hora(fecha_expedicion)
+async def cobro_hora(plan_name: str, plan_id: float):
+    return caja_page.corbro_x_hora(plan_name, plan_id)
 
 #endregion 
+
+#Peticiones para configurar los planes de cobro
+#region planes
+
+@app.get("/plan/", tags=["Planes"])
+async def get_plan(plan_name: str):
+    return await plan_page.get_plan(plan_name)
+
+@app.get("/plans/", tags=["Planes"])
+async def get_all_plans():
+    return await plan_page.get_all_plans()
+
+@app.post('/planes/', tags=["Planes"])
+async def create_plan(plan_request: PlanesCreate):
+    return await plan_page.create_plan(plan_request)
+
+@app.delete('/plan/', tags=["Planes"])
+async def delete_plan(plan_name: str):
+    return await plan_page.delete_plan(plan_name)
+
+#endregion
+
+#Peticiones para los cobros
+#region cobros
+
+@app.get("/cobros/", tags=["Cobros"])
+async def get_all_plans(plan_name:str):
+    return await cobros_page.get_all_cobros(plan_name)
+
+@app.post('/plan_hora', response_model=PlanCobroBase, tags=["Cobros"])
+async def create_plan_hora(plan_request: PlanCobroCreate, plan_name: str):
+    return await cobros_page.create_plan_hora(plan_request, plan_name)
+
+@app.post('/plan_fraccion', response_model=PlanCobroBase, tags=["Cobros"])
+async def create_plan_fraccion(plan_request: PlanCobroCreate, plan_name: str):
+    return await cobros_page.create_plan_fraccion(plan_request, plan_name)
+
+#endregion cobros
 
 
 #env\scripts\activate.bat

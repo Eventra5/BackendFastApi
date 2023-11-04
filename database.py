@@ -22,7 +22,7 @@ class User(Model):
     email = CharField()
     salt = CharField() 
     rol = CharField(max_length=5)
-    fecha_de_registro = DateField(constraints=[SQL('DEFAULT CURRENT_TIMESTAMP')])
+    fecha_de_registro = DateField()
 
     def __str__(self):
         return self.name
@@ -90,8 +90,7 @@ class AperturaCaja(Model):
     
     class Meta:
         database = DB
-        table_name = 'open box'
-
+        table_name = 'box_open'
 
 # Define el modelo de "cierre de caja"
 class CierreCaja(Model):
@@ -104,11 +103,9 @@ class CierreCaja(Model):
 
     class Meta:
         database = DB
-        table_name = 'close box'
-
+        table_name = 'box_close'
 
 class Transacciones(Model):
-
     transaccion = CharField()
     monto = FloatField()
     fecha = DateTimeField()
@@ -119,25 +116,39 @@ class Transacciones(Model):
         database = DB
         table_name = 'transacciones'
 
-
-class Plan_fraccion(Model):
+class Planes_cobro(Model):
     id = AutoField()
-    cobro_base = CharField()
-    cobro_hora = FloatField()
+    name = CharField(unique= True)
 
-    class Meta:
-        database = DB
-        table_name = 'plan fraccion'
-
-
-class Plan_x_hora(Model):
-    id = AutoField()
-    cobro_base = CharField()
-    cobro_hora = FloatField()
+    def __str__(self):
+        return self.name
     
     class Meta:
         database = DB
-        table_name = 'plan hora'
+        table_name = 'planes_cobro'
+
+class Plan_x_hora(Model):
+    id = AutoField()
+    plan = ForeignKeyField(Planes_cobro, backref='plan_cobro', column_name='plan', to_field='name')
+    cobro_base = FloatField()
+    cobro_hora = FloatField()
+    
+    def __str__(self):
+        return self.plan
+
+    class Meta:
+        database = DB
+        table_name = 'plan_hora'
+
+class Plan_fraccion(Model):
+    id = AutoField()
+    plan = ForeignKeyField(Planes_cobro, backref='plan_cobro', column_name='plan', to_field='name')
+    cobro_base = FloatField()
+    cobro_hora = FloatField()
+
+    class Meta:
+        database = DB
+        table_name = 'plan_fraccion'
 
 
 

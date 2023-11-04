@@ -13,7 +13,7 @@ async def get_discount(discount_id: str):
         discounts = Discount.select().where(Discount.id == discount_id)
 
         # Convierte los resultados en una lista de diccionarios
-        discounts_list = [{"id": discount.id, "percentage": discount.percentage, "start_date": discount.start_date, "end_date": discount.end_date} for discount in discounts]
+        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage} for discount in discounts]
 
         return discounts_list
     except DoesNotExist:
@@ -32,7 +32,7 @@ async def get_discount_name(company_name: str):
         discounts = Discount.select().where(Discount.company == company)
 
         # Convierte los resultados en una lista de diccionarios
-        discounts_list = [{"id": discount.id, "percentage": discount.percentage, "start_date": discount.start_date, "end_date": discount.end_date} for discount in discounts]
+        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage} for discount in discounts]
 
         return discounts_list
     except DoesNotExist:

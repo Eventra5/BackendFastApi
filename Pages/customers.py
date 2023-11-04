@@ -5,14 +5,14 @@ from peewee import DoesNotExist
 
 from fastapi import HTTPException
 
+from datetime import date
+
 import Email.Enviar_Qr as Enviar_Qr
-
-
 
 async def get_customer_companies(customer_email: str):
     try:
         # Obtener los registros de Customer_company para un cliente específico
-        customer_companies = Customer_company.select().where(Customer_company.customer_email == customer_email)
+        customer_companies = Customer_discount.select().where(Customer_discount.customer_email == customer_email)
         
         # Crear una lista de resultados como diccionarios
         results = [
@@ -43,6 +43,9 @@ async def get_all_customers():
 async def create_customer(request_customer, company_name, discount_id):
     try:
 
+        fecha_actual = date.today()
+        fecha_iniciof = fecha_actual.strftime("%d/%m/%Y")
+
         company = Company.get(Company.name == company_name)
 
         # Verificar si el correo electrónico ya está en uso
@@ -58,7 +61,7 @@ async def create_customer(request_customer, company_name, discount_id):
         customer = Customer.create(
             name=request_customer.name,
             last_name=request_customer.last_name,
-            email=request_customer.email,
+            email= request_customer.email,
         )
         
         # Obtener la empresa y el descuento existentes
@@ -67,10 +70,12 @@ async def create_customer(request_customer, company_name, discount_id):
         discount = Discount.get_by_id(discount_id)
 
 
-        Customer_company.create(
+        Customer_discount.create(
             customer=customer,
             company=company,
-            descuento=discount
+            descuento=discount,
+            fecha_inicio = fecha_iniciof,
+            fecha_fin = request_customer.fecha_fin
         )
 
         Enviar_Qr.send_email(request_customer.email)
@@ -94,7 +99,7 @@ async def delete_customer(customer_email: str):
             customer = Customer.get(Customer.email == customer_email)
 
             # Elimina los registros relacionados en la tabla Customer_company
-            Customer_company.delete().where(Customer_company.customer == customer).execute()
+            Customer_discount.delete().where(Customer_discount.customer == customer).execute()
 
             # Finalmente, elimina el cliente
             customer.delete_instance()

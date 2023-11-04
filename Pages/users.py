@@ -9,9 +9,9 @@ from schemas import UsuarioCreate, UsuarioBase
 
 from fastapi import HTTPException
 
+from datetime import date
 
 async def validate_user(username: str, password: str):
-
 
     if User.select().where(User.email == username).exists():
         raise HTTPException(status_code=400, detail="El usuario no existe")
@@ -59,6 +59,9 @@ async def get_all_users():
 
 async def create_user(user_request: UsuarioCreate):
 
+    fecha_actual = date.today()
+    fecha_iniciof = fecha_actual.strftime("%d/%m/%Y")
+
     if User.select().where(User.email == user_request.email).exists():
         raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
 
@@ -73,7 +76,8 @@ async def create_user(user_request: UsuarioCreate):
         password = user_request.password,
         rol = user_request.rol,
         email = user_request.email,
-        salt = salt
+        salt = salt,
+        fecha_registro = fecha_iniciof
     )
 
     return 'Usuario creado con exito'

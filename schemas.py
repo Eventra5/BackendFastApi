@@ -34,8 +34,6 @@ class CompanyResponse(BaseModel):
 #region Descuentos
 class DiscountBase(BaseModel):
     percentage: float = Field(..., gt=0, le=100)  # Porcentaje entre 0 y 100
-    start_date: datetime
-    end_date: datetime
 
 class DiscountCreate(DiscountBase):
     pass
@@ -47,6 +45,7 @@ class CustomerBase(BaseModel):
     name: str
     last_name: str
     email: EmailStr
+    fecha_fin: date
 
 
 class CustomerCreate(CustomerBase):
@@ -54,6 +53,7 @@ class CustomerCreate(CustomerBase):
 
 class Customer(CustomerBase):
     id: int
+    fecha_inicio: date
 
 #endregion
 
@@ -97,3 +97,32 @@ class TransaccionCreate(BaseModel):
 
 #endregion
 
+#region Plan hora
+class PlanesBase(BaseModel):
+    name: str
+
+class PlanesCreate(PlanesBase):
+    pass
+    
+class Planes(PlanesBase):
+    id: int
+
+
+
+class PlanCobroBase(BaseModel):
+    cobro_base: float
+    cobro_hora: float
+
+class PlanCobroCreate(PlanCobroBase):
+    pass
+    
+class PlanCobro(PlanCobroBase):
+    id: int
+    
+class Cobro(BaseModel):
+    id: int
+    plan: str
+    cobro_base: float
+    cobro_hora: float
+
+#endregion
