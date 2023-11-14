@@ -90,39 +90,29 @@ class CrearCaja(AbrirCajaBase):
     pass
 
 
-class TransaccionCreate(BaseModel):
+class TransaccionBase(BaseModel):
     transaccion: str
-    monto: float
     username: str
+
+class TransaccionCreate(TransaccionBase):
+    pass
+
+class Transaccion(TransaccionBase):
+    id: int
+    monto: float
 
 #endregion
 
-#region Plan hora
+#region Planes
 class PlanesBase(BaseModel):
-    name: str
+    plan: str
+    cobro_base: float
+    aumento: float
+
 
 class PlanesCreate(PlanesBase):
     pass
-    
+
 class Planes(PlanesBase):
     id: int
-
-
-
-class PlanCobroBase(BaseModel):
-    cobro_base: float
-    cobro_hora: float
-
-class PlanCobroCreate(PlanCobroBase):
-    pass
-    
-class PlanCobro(PlanCobroBase):
-    id: int
-    
-class Cobro(BaseModel):
-    id: int
-    plan: str
-    cobro_base: float
-    cobro_hora: float
-
 #endregion

@@ -2,12 +2,11 @@ from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
-from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Plan_fraccion, Plan_x_hora, Planes_cobro
+from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro
 from database import create_database
 
-from schemas import CompanyResponse, UsuarioBase, UsuarioCreate, CompanyCreate, DiscountBase, DiscountCreate, CustomerCreate, AbrirCajaBase, TransaccionCreate, PlanCobroCreate, PlanesCreate
-from schemas import PlanCobroBase, Cobro
-
+from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
+from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
 
 import Pages.users as user_page
 import Pages.companys as company_page
@@ -16,7 +15,7 @@ import Pages.customers as customer_page
 import Pages.login as login_page
 import Pages.caja as caja_page
 import Pages.planes_cobro as plan_page
-import Pages.p_cobros as cobros_page
+
 
 
 app = FastAPI(title="Estacionamiento", description="Software para el uso y administracion de estacionamientos", version='1.0.1')
@@ -40,8 +39,6 @@ def startup():
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
     connection.create_tables([Planes_cobro])
-    connection.create_tables([Plan_fraccion])
-    connection.create_tables([Plan_x_hora])
     
 @app.on_event('shutdown')
 def shutdown():
@@ -163,16 +160,16 @@ async def cerrar_caja(username: str):
     return await caja_page.cerrar_caja(username)
 
 @app.post("/transaccion/", tags=["Caja"])
-async def transaccion(transaccion_data: TransaccionCreate):
-    return caja_page.crear_transaccion(transaccion_data)
+async def transaccion(transaccion_data: TransaccionCreate, plan_name: str):
+    return caja_page.crear_transaccion(transaccion_data, plan_name)
 
 @app.post("/num-transacciones/", tags=["Caja"])
 async def transacciones(cierre_id):
     return caja_page.num_transacciones(cierre_id)
 
 @app.post("/cobro-hora/", tags=["Caja"])
-async def cobro_hora(plan_name: str, plan_id: float):
-    return caja_page.corbro_x_hora(plan_name, plan_id)
+async def cobro_dia(plan_name: str):
+    return caja_page.cobro_dia(plan_name)
 
 #endregion 
 
@@ -196,23 +193,6 @@ async def delete_plan(plan_name: str):
     return await plan_page.delete_plan(plan_name)
 
 #endregion
-
-#Peticiones para los cobros
-#region cobros
-
-@app.get("/cobros/", tags=["Cobros"])
-async def get_all_plans(plan_name:str):
-    return await cobros_page.get_all_cobros(plan_name)
-
-@app.post('/plan_hora', response_model=PlanCobroBase, tags=["Cobros"])
-async def create_plan_hora(plan_request: PlanCobroCreate, plan_name: str):
-    return await cobros_page.create_plan_hora(plan_request, plan_name)
-
-@app.post('/plan_fraccion', response_model=PlanCobroBase, tags=["Cobros"])
-async def create_plan_fraccion(plan_request: PlanCobroCreate, plan_name: str):
-    return await cobros_page.create_plan_fraccion(plan_request, plan_name)
-
-#endregion cobros
 
 
 #env\scripts\activate.bat

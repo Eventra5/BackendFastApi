@@ -1,8 +1,4 @@
 from peewee import *
-from datetime import datetime
-
-from peewee import DoesNotExist
-
 import mysql.connector
 
 DB = MySQLDatabase(
@@ -22,7 +18,7 @@ class User(Model):
     email = CharField()
     salt = CharField() 
     rol = CharField(max_length=5)
-    fecha_de_registro = DateField()
+    fecha_de_registro = CharField()
 
     def __str__(self):
         return self.name
@@ -118,7 +114,9 @@ class Transacciones(Model):
 
 class Planes_cobro(Model):
     id = AutoField()
-    name = CharField(unique= True)
+    plan = CharField(unique= True)
+    cobro_base = FloatField()
+    aumento = FloatField()
 
     def __str__(self):
         return self.name
@@ -126,31 +124,6 @@ class Planes_cobro(Model):
     class Meta:
         database = DB
         table_name = 'planes_cobro'
-
-class Plan_x_hora(Model):
-    id = AutoField()
-    plan = ForeignKeyField(Planes_cobro, backref='plan_cobro', column_name='plan', to_field='name')
-    cobro_base = FloatField()
-    cobro_hora = FloatField()
-    
-    def __str__(self):
-        return self.plan
-
-    class Meta:
-        database = DB
-        table_name = 'plan_hora'
-
-class Plan_fraccion(Model):
-    id = AutoField()
-    plan = ForeignKeyField(Planes_cobro, backref='plan_cobro', column_name='plan', to_field='name')
-    cobro_base = FloatField()
-    cobro_hora = FloatField()
-
-    class Meta:
-        database = DB
-        table_name = 'plan_fraccion'
-
-
 
 def create_database(nombre_base_de_datos):
 

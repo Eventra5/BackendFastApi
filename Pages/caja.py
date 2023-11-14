@@ -1,5 +1,5 @@
 from database import AperturaCaja, CierreCaja, User, Transacciones
-from database import Plan_fraccion, Plan_x_hora, Planes_cobro
+from database import Planes_cobro
 
 from MySQLdb import IntegrityError
 
@@ -77,41 +77,42 @@ async def cerrar_caja(username):
     
     return {"message": "Caja cerrada con éxito."}
 
-
-def crear_transaccion(transaccion_data, plan_name, plan_id):
-
-    plan = Planes_cobro.get(Planes_cobro.name == plan_name)
-
-    if Plan_x_hora.select().where(Plan_x_hora.plan == plan).exists():
-        # Agrega los planes de cobro por hora a la lista
-        plan_info = Plan_x_hora.get(Plan_x_hora.id == plan_id)
-
-
+def crear_transaccion(transaccion_data, plan_name):
 
     id_caja = obtener_id_apertura_caja()
 
     try:
-        # Verifica que la apertura de caja exista y está relacionada con el usuario
-        transaccion = Transacciones.create(
-            transaccion=transaccion_data.transaccion,
-            monto=transaccion_data.monto,
-            fecha=datetime.now(),
-            user=transaccion_data.username,
-            apertura_id=id_caja
-        )
+        if id_caja is None:
+            raise HTTPException(status_code=400, detail="No hay una caja abierta actualmente. Abra una caja para realizar transacciones.")
+        
+        calcular_monto = funciones_por_plan.get(plan_name)
 
-        return {"message": "Transacción creada exitosamente"}
-    
+        if calcular_monto:
+            monto = calcular_monto(plan_name)
+
+            transaccion = Transacciones.create(
+                transaccion=transaccion_data.transaccion,
+                monto=monto,
+                fecha=datetime.now(),
+                user=transaccion_data.username,
+                apertura_id=id_caja
+            )
+
+            return {"message": "Transacción creada exitosamente"}
+        else:
+            raise HTTPException(status_code=400, detail="Plan no encontrado o sin función asociada")
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-def corbro_x_hora(plan_name, plan_id):
-    try:
-        plan = Planes_cobro.get(Planes_cobro.name == plan_name)
+def cobro_fraccion(plan_name: str):
 
-        if Plan_x_hora.select().where(Plan_x_hora.plan == plan).exists():
-            # Agrega los planes de cobro por hora a la lista
-            plan_info = Plan_x_hora.get(Plan_x_hora.id == plan_id)
+    plan_info = Planes_cobro.get(Planes_cobro.name == plan_name)
+    costo_base = plan_info.costo_base
+    costo_hora = plan_info.costo_hora
+
+    try:
 
         fecha_expedicion = '2023-11-03 13:46:01'  # Asegúrate de que la hora tenga dos dígitos en el formato (02 en lugar de 2)
 
@@ -124,19 +125,74 @@ def corbro_x_hora(plan_name, plan_id):
         # Calcular la diferencia en horas y minutos entre la fecha de expedición y la fecha de fin
         diferencia = now - fecha_expedicion
 
-        print(fecha_expedicion)
-        print(now)
-        print(diferencia)
-   
-        # Calcular el costo basado en la tarifa de $20 por la primera hora
-        costo = plan_info.cobro_base
-        aumento = plan_info.cobro_hora
-
         # Si la diferencia es mayor que una hora, agregar $10 por cada hora adicional
         if diferencia > timedelta(hours=1):
             horas_adicionales = diferencia.total_seconds() / 3600 - 1  # Resta 1 hora base
-            costo += aumento * horas_adicionales
+            costo_base += costo_hora * horas_adicionales
+            costo = round(costo_base, 2)
 
         return {"costo": costo}
     except ValueError:
+        return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
+    
+def cobro_hora(plan_name: str):
+
+    plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+    costo_base = plan_info.cobro_base
+    aumento = plan_info.aumento
+
+    fecha_expedicion = '2023-11-03 13:46:01'  
+    fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
+
+    try:
+        
+        # Obtener la hora actual del sistema
+        fecha_fin = datetime.now()
+
+        # Calcular la diferencia en horas y minutos entre la fecha de expedición y la fecha de fin
+        diferencia = (fecha_fin - fecha_expedicion).total_seconds() / 3600
+        diferencia = int(diferencia)
+ 
+        costo = costo_base + aumento * max(0, diferencia - 1)
+
+        return costo
+    except ValueError:
         return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
+
+def cobro_dia(plan_name: str):
+    try:
+        # Obtener información del plan desde la base de datos
+        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        costo_base = plan_info.cobro_base
+        aumento = plan_info.aumento
+
+        # Obtener la fecha de expedición (simulada para propósitos de demostración)
+        fecha_expedicion_str = '2023-11-03 13:46:01'  # Formato: 'YYYY-MM-DD HH:MM:SS'
+        fecha_expedicion = datetime.strptime(fecha_expedicion_str, "%Y-%m-%d %H:%M:%S")
+
+        # Obtener la fecha y hora actuales del sistema
+        now = datetime.now()
+
+        # Calcular la diferencia entre la fecha actual y la fecha de expedición en segundos
+        diferencia_segundos = (now - fecha_expedicion).total_seconds()
+
+        # Convertir los segundos en días y horas
+        dias_transcurridos = diferencia_segundos // (24 * 3600)
+        horas_restantes = (diferencia_segundos % (24 * 3600)) // 3600
+
+        # Calcular el costo basado en la tarifa diaria y tarifa por hora adicional
+        costo = costo_base * dias_transcurridos + aumento * horas_restantes
+
+        return {"costo": costo}
+    except Planes_cobro.DoesNotExist:
+        return {"error": f"El plan '{plan_name}' no fue encontrado"}
+    except ValueError as e:
+        return {"error": str(e)}  # Manejar errores de conversión de fecha
+    except Exception as e:
+        return {"error": str(e)}  # Capturar y manejar otros errores
+    
+funciones_por_plan = {
+    "hora": cobro_hora,
+    "fracccion": cobro_fraccion,
+    "dia": cobro_dia,
+}

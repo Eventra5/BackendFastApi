@@ -62,6 +62,7 @@ async def create_user(user_request: UsuarioCreate):
     fecha_actual = date.today()
     fecha_iniciof = fecha_actual.strftime("%d/%m/%Y")
 
+
     if User.select().where(User.email == user_request.email).exists():
         raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
 

@@ -1,4 +1,4 @@
-from database import Plan_fraccion, Plan_x_hora, Planes_cobro
+from database import Planes_cobro
 
 from fastapi import HTTPException
 
@@ -17,40 +17,33 @@ async def get_plan(plan_name):
 async def get_all_plans():
     plan = list(Planes_cobro.select())
 
-    return [{"id": plan.id, "name": plan.name} for plan in plan]
+    return [{"ID": plan.id, "Plan": plan.plan, "Cobro base": plan.cobro_base, 'Aumento': plan.aumento} for plan in plan]
 
 async def create_plan(plan_request):
 
-    if Planes_cobro.select().where(Planes_cobro.name == plan_request.name).exists():
+    if Planes_cobro.select().where(Planes_cobro.plan == plan_request.plan).exists():
         raise HTTPException(status_code=400, detail="El plan de cobro ya esta registrado")
     
     plan = Planes_cobro.create(
-        name = plan_request.name,
+        plan = plan_request.plan,
+        cobro_base = plan_request.cobro_base,
+        aumento = plan_request.aumento
     )
 
     return 'Plan creado con exito'
 
 async def delete_plan(plan_name):
+
     try:
-        with DB.atomic():
-            
-            # Encuentra la empresa que deseas eliminar
-            plan = Planes_cobro.get(Planes_cobro.name == plan_name)
 
-            if Plan_x_hora.select().where(Plan_x_hora.plan == plan_name).exists():
-        
-                Plan_x_hora.delete().where(Plan_x_hora.plan == plan).execute()
+        plan = Planes_cobro.select().where((Planes_cobro.plan == plan_name)).first()
 
-            if Plan_fraccion.select().where(Plan_fraccion.plan == plan_name).exists():
-
-                Plan_fraccion.delete().where(Plan_fraccion.plan == plan).execute()
-
+        if plan:
             plan.delete_instance()
-
-            return {"mensaje": f"El plan: '{plan_name}' y sus registros relacionados eliminados exitosamente."}
+            return {"mensaje": "Plan eliminado con exito"}
+        else:
+            raise HTTPException(status_code=404, detail="El plan no existe")
+        
     except DoesNotExist:
-        raise HTTPException(status_code=404, detail="El plan no existe.")
-    except Exception as e:
-        # Maneja cualquier otro error que pueda ocurrir durante la transacción
-        raise HTTPException(status_code=500, detail="Error interno del servidor")
+        raise HTTPException(status_code=404, detail="Plan no encontrada")
 
