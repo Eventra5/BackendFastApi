@@ -8,6 +8,8 @@ from database import create_database
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
 from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
 
+from peewee import DoesNotExist
+
 import Pages.users as user_page
 import Pages.companys as company_page
 import Pages.discounts as discounts_page
@@ -16,11 +18,20 @@ import Pages.login as login_page
 import Pages.caja as caja_page
 import Pages.planes_cobro as plan_page
 
+from fastapi.middleware.cors import CORSMiddleware
 
 
 app = FastAPI(title="Estacionamiento", description="Software para el uso y administracion de estacionamientos", version='1.0.1')
 
 create_database('estacionamiento')
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
 
 #Eventos para el servidor
 #region event server
@@ -39,7 +50,7 @@ def startup():
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
     connection.create_tables([Planes_cobro])
-    
+
 @app.on_event('shutdown')
 def shutdown():
 
@@ -63,15 +74,11 @@ async def login(request_login: OAuth2PasswordRequestForm = Depends()):
 #Peticiones para los usuarios
 #region users
 
-@app.get("/userss/", tags=["User"])
-async def get_user(username: str, password: str):
-    return await user_page.validate_user(username, password)
+@app.get("/users/{username}", tags=["User"])
+async def get_user(username: str):
+    return await user_page.get_user(username)
 
-@app.get("/users/{user_get}", tags=["User"])
-async def get_user(user_get: str):
-    return await user_page.get_user(user_get)
-
-@app.get("/all_users", tags=["User"])
+@app.get("/users", tags=["User"])
 async def get_all_users():
     return await user_page.get_all_users()
 
@@ -79,13 +86,13 @@ async def get_all_users():
 async def create_user(user_request: UsuarioCreate):
     return await user_page.create_user(user_request)
 
-@app.put("/users/{user_update}", tags=["User"])
-async def update_user(user_update: str, usuario_update: UsuarioBase):
-    return await user_page.update_user(user_update, usuario_update)
+@app.put("/users/{username}", tags=["User"])
+async def update_user(user_request: UsuarioBase, username: str):
+    return await user_page.update_user(user_request, username)
 
-@app.delete('/users/{user_delete}/{password_delete}', tags=["User"])
-async def delete_user(user_delete,password_delete):
-    return await user_page.delete_user(user_delete,password_delete)
+@app.delete('/users/{username}', tags=["User"])
+async def delete_user(username: str, password: str):
+    return await user_page.delete_user(username, password)
 #endregion
 
 #Peticiones para las empresas
