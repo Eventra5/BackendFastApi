@@ -77,7 +77,17 @@ async def cerrar_caja(username):
     
     return {"message": "Caja cerrada con éxito."}
 
+<<<<<<< Updated upstream
 def crear_transaccion(transaccion_data, plan_name):
+=======
+def transacciones(cierre_id):
+    # Buscar el rango de transacciones utilizando el ID de cierre de caja
+    num_transacciones = Transacciones.select().join(CierreCaja, on=(Transacciones.apertura_caja == CierreCaja.apertura_caja)).where(CierreCaja.id == cierre_id).count()
+
+    return num_transacciones
+
+def crear_transaccion(transaccion_data):
+>>>>>>> Stashed changes
 
     id_caja = obtener_id_apertura_caja()
 
