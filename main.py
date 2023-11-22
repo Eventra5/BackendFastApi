@@ -151,6 +151,10 @@ async def get_all_customers():
 async def create_customer(request_customer: CustomerCreate, company: str, id: int):
     return await customer_page.create_customer(request_customer, company, id)
 
+@app.post("/customer-discount/{company}", tags=["Customer"])
+async def create_customer(email: str, company: str, id: int):
+    return await customer_page.create_discount(email, company, id)
+
 @app.delete("/customer/{email}", tags=["Customer"])
 async def delete_customer(email: str):
     return await customer_page.delete_customer(email)

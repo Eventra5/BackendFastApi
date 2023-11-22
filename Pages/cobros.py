@@ -2,6 +2,8 @@ from typing import Optional
 
 from database import Planes_cobro
 
+from fastapi import HTTPException
+
 from datetime import datetime, timedelta
 
 def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
@@ -33,6 +35,10 @@ def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
 
         costo = round(costo_base, 2)
         return costo
+
+    except Planes_cobro.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
+    
     except ValueError:
         return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
 
@@ -53,7 +59,7 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
         # Calcular la diferencia en horas y minutos entre la fecha de expedición y la fecha de fin
         diferencia = (fecha_fin - fecha_expedicion).total_seconds() / 3600
         diferencia = int(diferencia)
- 
+
         costo_base = costo_base + aumento * max(0, diferencia - 1)
 
         # Aplicar el descuento si se proporciona
@@ -62,16 +68,20 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
 
         costo = round(costo_base, 2)
         return costo
+    
+    except Planes_cobro.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
+    
     except ValueError:
         return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
     
+
 def cobro_dia(plan_name: str, descuento: Optional[float] = None):
 
-    print (descuento)
-    
     try:
         # Obtener información del plan desde la base de datos
         plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
 
@@ -96,14 +106,17 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
             costo_base -= (costo_base * descuento) / 100  # Aplicar el descuento
 
         costo = round(costo_base, 2)
-        return costo
+        return costo    
+
+    except Planes_cobro.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
-    except Planes_cobro.DoesNotExist:
-        return {"error": f"El plan '{plan_name}' no fue encontrado"}
     except ValueError as e:
         return {"error": str(e)}  # Manejar errores de conversión de fecha
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
+    
+    
     
 funciones_por_plan = {
     "hora": cobro_hora,

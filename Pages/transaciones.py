@@ -1,9 +1,9 @@
-from database import AperturaCaja, CierreCaja ,Transacciones, Customer_discount,Discount
+from database import AperturaCaja, CierreCaja ,Transacciones, Customer_discount
 from datetime import datetime, date
 from fastapi import HTTPException
 import Pages.cobros as cobros
 
-from peewee import DoesNotExist
+
 
 def validar_descuento(email: str):
     
@@ -21,7 +21,7 @@ def validar_descuento(email: str):
         if fecha_actual < fecha_inicio or fecha_actual > fecha_fin:
             # La fecha actual no está dentro del rango del descuento, eliminar el registro
             descuento_cliente.delete_instance()
-            return 0  # Indicar que se eliminó el descuento
+            return None  # Indicar que se eliminó el descuento
         else:
             # La fecha actual está dentro del rango del descuento, retornar el porcentaje de descuento
             return descuento_cliente.descuento.percentage  # Retorna el porcentaje de descuento asociado al cliente
@@ -29,7 +29,6 @@ def validar_descuento(email: str):
     except Customer_discount.DoesNotExist:
         return None  # No se encontró una apertura de caja sin cierre
 
-        
 def obtener_id_apertura_caja():
     try:
         # Buscar la última apertura de caja que no tiene cierre asociado
@@ -64,18 +63,22 @@ def crear_transaccion(transaccion_data, plan_name, email):
             monto = calcular_monto(plan_name, descuento)
             print(monto)
 
-            transaccion = Transacciones.create(
-                transaccion=transaccion_data.transaccion,
-                monto=monto,
-                fecha=datetime.now(),
-                user=transaccion_data.username,
-                apertura_id=id_caja
-            )
-
-            return {"message": f"Transacción creada exitosamente /n el monto es:{monto}"}
         else:
             raise HTTPException(status_code=400, detail="Plan no encontrado o sin función asociada")
+        
+        transaccion = Transacciones.create(
+
+            transaccion=transaccion_data.transaccion,
+            monto=monto,
+            fecha=datetime.now(),
+            user=transaccion_data.username,
+            apertura_id=id_caja
+        )
+
+        return {"message": f"Transacción creada exitosamente {'/n'} el monto es: {monto}"}
+
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+        

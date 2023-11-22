@@ -79,6 +79,8 @@ async def create_user(user_request):
             salt=salt,
             fecha_registro=date.today().strftime("%d/%m/%Y")
         )
+
+        
     except OperationalError as e:
         if "Check constraint 'users_chk_1' is violated" in str(e):
             raise HTTPException(status_code=400, detail="El valor proporcionado para 'rol' no es válido. Use 'admin' o 'user'.")

@@ -74,12 +74,55 @@ async def create_customer(request_customer, company_name, discount_id):
             company=company,
             descuento=discount,
             fecha_inicio = date.today(),
-            fecha_fin = "2023/12/1"
+            fecha_fin = "2023/10/01"
         )
 
         #Enviar_Qr.send_email(request_customer.email)
 
         return {"message": "Cliente creado y asociado con éxito"}
+
+    except Company.DoesNotExist:
+        raise HTTPException(status_code=404, detail="La empresa no existe")
+
+    except IntegrityError as e:
+        raise HTTPException(status_code=400, detail=f"Error de integridad de la base de datos: {str(e)}")
+
+    except OperationalError as e:
+        raise HTTPException(status_code=500, detail=f"Error de operación de base de datos: {str(e)}")
+
+async def create_discount(email, company, id):
+
+    try:
+
+        company = Company.get(Company.name == company)
+
+        # Verificar si el correo electrónico ya está en uso
+        if Customer.select().where(Customer.email == email).exists():
+            raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
+        
+        if not Discount.select().where(Discount.company == company).exists():
+            raise HTTPException(status_code=404, detail="El descuento no existe")
+        
+        if not Discount.select().where(Discount.id == id).exists():
+            raise HTTPException(status_code=404, detail="El descuento no existe")
+        
+        
+        # Obtener la empresa y el descuento existentes
+        customer = Customer.get(Customer.email == email)
+        company = Company.get(Company.name == company)
+        discount = Discount.get_by_id(id)
+
+        Customer_discount.create(
+            customer=customer,
+            company=company,
+            descuento=discount,
+            fecha_inicio = date.today(),
+            fecha_fin = "2023/12/01"
+        )
+
+        #Enviar_Qr.send_email(request_customer.email)
+
+        return {"message": "Descuento asociado con éxito"}
 
     except Company.DoesNotExist:
         raise HTTPException(status_code=404, detail="La empresa no existe")
