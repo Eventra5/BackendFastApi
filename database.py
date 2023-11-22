@@ -55,6 +55,7 @@ class Customer(Model):
     name = CharField(max_length=100)
     last_name = CharField(max_length=100)
     email = CharField(max_length=100, unique=True)
+    descuento = BooleanField(default=True)
 
 
     def __str__(self):

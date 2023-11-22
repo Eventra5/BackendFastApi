@@ -6,11 +6,11 @@ from schemas import DiscountCreate
 
 from fastapi import HTTPException
 
-async def get_discount(discount_id: str):
+async def get_discount(id):
 
     try:
         # Utiliza la relación 'discounts' para obtener los descuentos relacionados
-        discounts = Discount.select().where(Discount.id == discount_id)
+        discounts = Discount.select().where(Discount.id == id)
 
         # Convierte los resultados en una lista de diccionarios
         discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage} for discount in discounts]
@@ -55,9 +55,9 @@ async def create_discount(discount: DiscountCreate, company_name: str):
     new_discount = Discount.create(company=company, **discount_data)
     return new_discount
 
-async def delete_discount(discount_id):
+async def delete_discount(id):
 
-    discount = Discount.select().where((Discount.id == discount_id)).first()
+    discount = Discount.select().where((Discount.id == id)).first()
 
     if discount:
         discount.delete_instance()

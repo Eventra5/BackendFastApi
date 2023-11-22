@@ -41,10 +41,8 @@ async def get_all_customers():
     return [{"id": customer.id, "name": customer.name, "last name": customer.last_name, "email": customer.email} for customer in customer]
 
 async def create_customer(request_customer, company_name, discount_id):
-    try:
 
-        fecha_actual = date.today()
-        fecha_iniciof = fecha_actual.strftime("%d/%m/%Y")
+    try:
 
         company = Company.get(Company.name == company_name)
 
@@ -59,9 +57,10 @@ async def create_customer(request_customer, company_name, discount_id):
             raise HTTPException(status_code=404, detail="El descuento no existe")
         
         customer = Customer.create(
-            name=request_customer.name,
-            last_name=request_customer.last_name,
+            name= request_customer.name,
+            last_name= request_customer.last_name,
             email= request_customer.email,
+            descuento= True,
         )
         
         # Obtener la empresa y el descuento existentes
@@ -74,11 +73,11 @@ async def create_customer(request_customer, company_name, discount_id):
             customer=customer,
             company=company,
             descuento=discount,
-            fecha_inicio = fecha_iniciof,
-            fecha_fin = request_customer.fecha_fin
+            fecha_inicio = date.today(),
+            fecha_fin = "2023/12/1"
         )
 
-        Enviar_Qr.send_email(request_customer.email)
+        #Enviar_Qr.send_email(request_customer.email)
 
         return {"message": "Cliente creado y asociado con éxito"}
 
