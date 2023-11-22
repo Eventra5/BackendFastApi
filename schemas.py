@@ -41,12 +41,13 @@ class DiscountCreate(DiscountBase):
 #endregion
 
 #region clientes
+
+    
 class CustomerBase(BaseModel):
     name: str
     last_name: str
     email: EmailStr
-    fecha_fin: date
-
+    fecha_fin: str
 
 class CustomerCreate(CustomerBase):
     pass

@@ -1,25 +1,27 @@
-from database import Company, Discount
+from database import DB 
 
 from peewee import DoesNotExist
 
-from database import DB 
+from fastapi import HTTPException
 
 from schemas import CompanyCreate
 
-from fastapi import HTTPException
+from database import Company, Discount
 
-async def get_company(company_get: str):
-    company = Company.get_or_none(Company.name == company_get)
+async def get_company(company):
 
-    if company:
-        return company.__dict__["__data__"]
+    company_info = Company.get_or_none(Company.name == company)
+
+    if company_info:
+        return company_info.__dict__["__data__"]
     else:
-        raise HTTPException(status_code=404, detail=f"Empresa '{company_get}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Empresa '{company}' no encontrado")
 
 async def get_all_companies():
-    company = list(Company.select())
 
-    return [{"id": company.id, "name": company.name} for company in company]
+    company_info = list(Company.select())
+
+    return [{"id": company.id, "name": company.name} for company in company_info]
     
 async def create_company(company_request: CompanyCreate):
 
@@ -33,19 +35,19 @@ async def create_company(company_request: CompanyCreate):
 
     return company
 
-async def delete_company(company_name):
+async def delete_company(company):
     try:
         with DB.atomic():
             # Encuentra la empresa que deseas eliminar
-            company = Company.get(Company.name == company_name)
+            company_info = Company.get(Company.name == company)
 
             # Elimina los registros relacionados en la tabla Discount
-            Discount.delete().where(Discount.company == company).execute()
+            Discount.delete().where(Discount.company == company_info).execute()
 
             # Finalmente, elimina la empresa
-            company.delete_instance()
+            company_info.delete_instance()
 
-            return {"mensaje": f"La empresa: '{company_name}' y sus registros relacionados eliminados exitosamente."}
+            return {"mensaje": f"La empresa: '{company}' y sus registros relacionados eliminados exitosamente."}
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="La empresa no existe.")
     except Exception as e:

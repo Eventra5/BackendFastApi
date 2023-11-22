@@ -61,7 +61,7 @@ def send_email(email):
     server.login(smtp_username, smtp_password)
 
     # Crear el mensaje
-    subject = 'Qr de cliente del estacionamiento'
+    subject = 'Qr estacionamiento'
     from_email = smtp_username
     to_email = email
     message = MIMEMultipart()
@@ -70,7 +70,7 @@ def send_email(email):
     message['Subject'] = subject
 
     # Cuerpo del correo
-    body = 'Gracias por formar parte de esta empresa, acontinuacion se le adjuntara Qr tener descuentos en el estacionamiento.'
+    body = 'Gracias por formar parte de esta empresa, acontinuacion se le adjuntara un Qr para tener descuentos en el estacionamiento.'
     message.attach(MIMEText(body, 'plain'))
 
     # Adjuntar una imagen (en este caso, el código QR)

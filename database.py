@@ -17,8 +17,8 @@ class User(Model):
     last_name = CharField()
     email = CharField()
     salt = CharField() 
-    rol = CharField(max_length=5)
-    fecha_de_registro = CharField()
+    rol = CharField(max_length=5, constraints=[Check('rol IN (\'admin\', \'user\')')])
+    fecha_registro = CharField()
 
     def __str__(self):
         return self.name
@@ -55,6 +55,7 @@ class Customer(Model):
     name = CharField(max_length=100)
     last_name = CharField(max_length=100)
     email = CharField(max_length=100, unique=True)
+    descuento = BooleanField(default=True)
 
 
     def __str__(self):

@@ -1,15 +1,30 @@
 import bcrypt
 import random
 
-from Passwords.password import hashed_password
-
+from datetime import date
 from database import User
-
-from schemas import UsuarioCreate, UsuarioBase
 
 from fastapi import HTTPException
 
-from datetime import date
+from peewee import OperationalError
+
+from Passwords.password import hashed_password
+
+###############################################################################
+
+def create_username (name: str, last_name:str):
+
+    username_base = (name[:2] + last_name[:2].lower())
+    id_random = random.randint(0,9) * 10 + random.randint(0,9)
+
+    username = f'{username_base}{id_random}'
+
+    while User.select().where(User.username == username).exists():
+
+        id_random = random.randint(0,9) * 10 + random.randint(0,9)
+        username = f'{username_base}{id_random}'
+    
+    return username
 
 async def validate_user(username: str, password: str):
 
@@ -29,39 +44,22 @@ async def validate_user(username: str, password: str):
     else:
         return False  # La contraseña no es válida
 
-def create_username (name: str, last_name:str):
+async def get_user(username):
 
-    username_base = (name[:2] + last_name[:2].lower())
-    id_random = random.randint(0,9) * 10 + random.randint(0,9)
-
-    username = f'{username_base}{id_random}'
-
-    while User.select().where(User.username == username).exists():
-
-        id_random = random.randint(0,9) * 10 + random.randint(0,9)
-        username = f'{username_base}{id_random}'
-    
-    return username
-
-async def get_user(user_get: str):
-
-    user = User.get_or_none(User.name == user_get)
+    user = User.get_or_none(User.username == username)
+    print(username)
 
     if user:
         return user.__dict__["__data__"]
     else:
-        raise HTTPException(status_code=404, detail=f"Usuario '{user_get}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Usuario '{username}' no encontrado")
 
 async def get_all_users():
     users = list(User.select())
 
     return [{"id": user.id, "name": user.name, "email": user.email} for user in users]
 
-async def create_user(user_request: UsuarioCreate):
-
-    fecha_actual = date.today()
-    fecha_iniciof = fecha_actual.strftime("%d/%m/%Y")
-
+async def create_user(user_request):
 
     if User.select().where(User.email == user_request.email).exists():
         raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
@@ -70,39 +68,46 @@ async def create_user(user_request: UsuarioCreate):
 
     password_hashed, salt = hashed_password(user_request.password)
 
-    user = User.create(
-        username = username,
-        name = user_request.name,
-        last_name = user_request.last_name,
-        password = user_request.password,
-        rol = user_request.rol,
-        email = user_request.email,
-        salt = salt,
-        fecha_registro = fecha_iniciof
-    )
+    try:
+        user = User.create(
+            username=username,
+            name=user_request.name,
+            last_name=user_request.last_name,
+            password=user_request.password,
+            rol=user_request.rol,  # Asegúrate de usar roles válidos aquí
+            email=user_request.email,
+            salt=salt,
+            fecha_registro=date.today().strftime("%d/%m/%Y")
+        )
+    except OperationalError as e:
+        if "Check constraint 'users_chk_1' is violated" in str(e):
+            raise HTTPException(status_code=400, detail="El valor proporcionado para 'rol' no es válido. Use 'admin' o 'user'.")
+        else:
+            raise HTTPException(status_code=500, detail="Error interno del servidor. Por favor, contacta al administrador.")
 
-    return 'Usuario creado con exito'
+    return {"mensaje": "Usurio creado con exito"}
 
-async def update_user(user_update: str, usuario_update: UsuarioBase):
-    user = User.get_or_none(User.name == user_update)
+async def update_user(user_request, username):
+
+    user = User.get_or_none(User.username == username)
 
     if user:
         # Actualiza los campos del usuario con los valores proporcionados
-        user.name = usuario_update.name
-        user.rol = usuario_update.rol
-        user.email = usuario_update.email
+        user.name = user_request.name
+        user.rol = user_request.rol
+        user.email = user_request.email
         user.save()
-        return {"mensaje": f"Datos del usuario '{usuario_update}' actualizados exitosamente"}
+        return {"mensaje": "Datos del usuario actualizados exitosamente"}
     else:
-        raise HTTPException(status_code=404, detail=f"Usuario '{user_update}' no encontrado")
+        raise HTTPException(status_code=404, detail=f"Usuario: '{username}' no encontrado")
 
-async def delete_user(user_delete, password_delete):
+async def delete_user(username, password):
 
-    user = User.select().where((User.name == user_delete) & (User.password == password_delete)).first()
+    user = User.select().where((User.username == username) & (User.password == password)).first()
 
     if user:
         user.delete_instance()
-        return {"mensaje": f"Usuario '{user_delete}' eliminado exitosamente"}
+        return {"mensaje": f"Usuario '{username}' eliminado exitosamente"}
     else:
         raise HTTPException(status_code=404, detail="El usuario no existe")
 
