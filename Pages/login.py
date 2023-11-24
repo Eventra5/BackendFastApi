@@ -1,6 +1,3 @@
-
-from fastapi import Depends
-from fastapi.security import OAuth2PasswordRequestForm
 import jwt  
 
 from database import User

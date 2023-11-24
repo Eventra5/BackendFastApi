@@ -8,11 +8,12 @@ from datetime import datetime, timedelta
 
 def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
 
-    plan_info = Planes_cobro.get(Planes_cobro.name == plan_name)
-    costo_base = plan_info.costo_base
-    costo_hora = plan_info.costo_hora
-
     try:
+
+        plan_info = Planes_cobro.get(Planes_cobro.name == plan_name)
+        costo_base = plan_info.costo_base
+        costo_hora = plan_info.costo_hora
+
         fecha_expedicion = '2023-11-03 13:46:01'  # Asegúrate de que la hora tenga dos dígitos en el formato (02 en lugar de 2)
 
         # Convertir la fecha de expedición en un objeto datetime
@@ -39,20 +40,22 @@ def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
     except Planes_cobro.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
-    except ValueError:
-        return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
+    except ValueError as e:
+        return {"error": str(e)}  # Manejar errores de conversión de fecha
+    except Exception as e:
+        return {"error": str(e)}  # Capturar y manejar otros errores
 
 def cobro_hora(plan_name: str, descuento: Optional[float] = None):
 
-    plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
-    costo_base = plan_info.cobro_base
-    aumento = plan_info.aumento
-
-    fecha_expedicion = '2023-11-03 13:46:01'  
-    fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
-
     try:
         
+        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        costo_base = plan_info.cobro_base
+        aumento = plan_info.aumento
+
+        fecha_expedicion = '2023-11-03 13:46:01'  
+        fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
+
         # Obtener la hora actual del sistema
         fecha_fin = datetime.now()
 
@@ -72,8 +75,10 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
     except Planes_cobro.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
-    except ValueError:
-        return {"error": "Formato de fecha incorrecto. Utiliza el formato 'YYYY-MM-DD HH:MM:SS'"}
+    except ValueError as e:
+        return {"error": str(e)}  # Manejar errores de conversión de fecha
+    except Exception as e:
+        return {"error": str(e)}  # Capturar y manejar otros errores
     
 
 def cobro_dia(plan_name: str, descuento: Optional[float] = None):

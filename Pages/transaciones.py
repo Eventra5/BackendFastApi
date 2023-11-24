@@ -1,4 +1,4 @@
-from database import AperturaCaja, CierreCaja ,Transacciones, Customer_discount
+from database import AperturaCaja, CierreCaja ,Transacciones, Customer_discount, Customer
 from datetime import datetime, date
 from fastapi import HTTPException
 import Pages.cobros as cobros
@@ -11,17 +11,27 @@ def validar_descuento(email: str):
     fecha_actual = date.today()
 
     try:
+    
+        customer = Customer.get(Customer.email == email)
+        print(customer.email)
 
-        descuento_cliente = Customer_discount.get(Customer_discount.customer == email)
+        if customer.descuento == False:
+            return False
         
+        descuento_cliente = Customer_discount.get(Customer_discount.customer == email)
+
         # Verificar si la fecha actual está dentro del rango del descuento del cliente
         fecha_inicio = descuento_cliente.fecha_inicio
         fecha_fin = descuento_cliente.fecha_fin
 
         if fecha_actual < fecha_inicio or fecha_actual > fecha_fin:
-            # La fecha actual no está dentro del rango del descuento, eliminar el registro
+
+            customer.descuento = False
+            customer.save()  # Guardar el cambio en la base de datos
             descuento_cliente.delete_instance()
-            return None  # Indicar que se eliminó el descuento
+
+            raise HTTPException(status_code=400, detail="El descuento ya expiro")
+        
         else:
             # La fecha actual está dentro del rango del descuento, retornar el porcentaje de descuento
             return descuento_cliente.descuento.percentage  # Retorna el porcentaje de descuento asociado al cliente
@@ -46,15 +56,20 @@ def num_transacciones(cierre_id):
 
 def crear_transaccion(transaccion_data, plan_name, email):
 
-    id_caja = obtener_id_apertura_caja()
-    descuento = validar_descuento(email)
-    print (descuento)
-
     try:
 
+        print(123)
+        
+        id_caja = obtener_id_apertura_caja()
+        descuento = validar_descuento(email)
+
+        if descuento is False:
+            raise HTTPException(status_code=400, detail="El descuento ya expiro")
+        
         if id_caja is None:
             raise HTTPException(status_code=400, detail="No hay una caja abierta actualmente. Abra una caja para realizar transacciones.")
         
+
         if plan_name in cobros.funciones_por_plan:
             # Obtiene la función correspondiente al plan
             calcular_monto = cobros.funciones_por_plan[plan_name]
@@ -79,6 +94,7 @@ def crear_transaccion(transaccion_data, plan_name, email):
 
     except HTTPException as http_exc:
         raise http_exc
+    
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
         

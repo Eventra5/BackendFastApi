@@ -1,5 +1,7 @@
 from typing import Optional
+
 from fastapi import FastAPI, Depends
+
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
@@ -77,7 +79,7 @@ async def login(request_login: OAuth2PasswordRequestForm = Depends()):
 #region users
 
 @app.get("/users/{username}", tags=["User"])
-async def get_user(username: str):
+async def get_user(username: str, ):
     return await user_page.get_user(username)
 
 @app.get("/users", tags=["User"])
@@ -152,8 +154,8 @@ async def create_customer(request_customer: CustomerCreate, company: str, id: in
     return await customer_page.create_customer(request_customer, company, id)
 
 @app.post("/customer-discount/{company}", tags=["Customer"])
-async def create_customer(email: str, company: str, id: int):
-    return await customer_page.create_discount(email, company, id)
+async def create_customer(id: int, company: str, email: str):
+    return await customer_page.create_discount(id, company, email)
 
 @app.delete("/customer/{email}", tags=["Customer"])
 async def delete_customer(email: str):
