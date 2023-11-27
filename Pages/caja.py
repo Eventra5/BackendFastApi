@@ -1,4 +1,6 @@
-from database import AperturaCaja, CierreCaja, User
+from database import AperturaCaja, CierreCaja, User, Transacciones
+
+from peewee import fn
 
 from MySQLdb import IntegrityError
 
@@ -7,7 +9,23 @@ from fastapi import HTTPException
 from schemas import CrearCaja
 
 from datetime import datetime
+
+###############################################################################
+
+def Calcular_total(id: int):
+
+    try:
+        total_montos = Transacciones.select(fn.SUM(Transacciones.monto)).where(
+            Transacciones.apertura_caja == id
+        ).scalar()
+
+        return total_montos if total_montos is not None else 0.0
     
+    except Transacciones.DoesNotExist:
+        return 0.0
+
+    
+
 async def abrir_caja(request_caja: CrearCaja):
 
     # Verifica que el usuario de apertura exista
@@ -39,11 +57,12 @@ async def cerrar_caja(username):
 
     # Verificar si existe una apertura de caja activa
     ultima_apertura = AperturaCaja.select().where(AperturaCaja.estado == True).order_by(AperturaCaja.fecha.desc()).first()
+
     if not ultima_apertura:
         raise HTTPException(status_code=400, detail="No existe una caja abierta para cerrar.")
     
-    #Calculamos la cantidad final provisionalmente
-    cantidad_final = 1200.0  #Establecemos el valor de la cantidad final
+    total_cobros = Calcular_total(1)
+    cantidad_final = total_cobros + ultima_apertura.cantidad_inicial
     diferencia = cantidad_final - ultima_apertura.cantidad_inicial
     
     # Registrar el cierre de caja

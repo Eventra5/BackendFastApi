@@ -169,11 +169,13 @@ async def delete_customer(email: str):
 async def abrir_caja(request_caja: AbrirCajaBase):
     return await caja_page.abrir_caja(request_caja)
 
-
 @app.post("/cerrar-caja/", tags=["Caja"])
 async def cerrar_caja(username: str):
     return await caja_page.cerrar_caja(username)
 
+@app.post("/ultimacaja/", tags=["Caja"])
+async def caja(id: int):
+    return await caja_page.Calcular_total(id)
 #endregion 
 
 #region transacciones

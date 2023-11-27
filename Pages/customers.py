@@ -74,7 +74,7 @@ async def create_customer(request_customer, company_name, discount_id):
             company=company,
             descuento=discount,
             fecha_inicio = date.today(),
-            fecha_fin = "2023/10/01"
+            fecha_fin = "2023/10/01",           
         )
 
         #Enviar_Qr.send_email(request_customer.email)
@@ -91,8 +91,6 @@ async def create_customer(request_customer, company_name, discount_id):
         raise HTTPException(status_code=500, detail=f"Error de operación de base de datos: {str(e)}")
 
 async def create_discount(id, company, email):
-
-    print(company)
 
     try:
 
@@ -112,6 +110,9 @@ async def create_discount(id, company, email):
         # Obtener la empresa y el descuento existentes
         customer = Customer.get(Customer.email == email)
         discount = Discount.get_by_id(id)
+
+        customer.descuento = True
+        customer.save()  # Guardar el cambio en la base de datos
 
         Customer_discount.create(
             customer=customer,

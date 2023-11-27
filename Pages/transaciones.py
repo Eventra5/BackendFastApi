@@ -6,38 +6,38 @@ import Pages.cobros as cobros
 
 
 def validar_descuento(email: str):
+
+    if not email:
+        return None 
     
-    # Obtener la fecha actual
     fecha_actual = date.today()
 
     try:
-    
+
         customer = Customer.get(Customer.email == email)
-        print(customer.email)
 
-        if customer.descuento == False:
-            return False
-        
-        descuento_cliente = Customer_discount.get(Customer_discount.customer == email)
+        if not customer.descuento:
+            raise HTTPException(status_code=400, detail="No hay descuento asociado")
 
-        # Verificar si la fecha actual está dentro del rango del descuento del cliente
+        descuento_cliente = Customer_discount.get(Customer_discount.customer == customer)
+
         fecha_inicio = descuento_cliente.fecha_inicio
         fecha_fin = descuento_cliente.fecha_fin
 
         if fecha_actual < fecha_inicio or fecha_actual > fecha_fin:
-
             customer.descuento = False
             customer.save()  # Guardar el cambio en la base de datos
             descuento_cliente.delete_instance()
+            raise HTTPException(status_code=400, detail="El descuento ya expiró")
+        
+        else: 
 
-            raise HTTPException(status_code=400, detail="El descuento ya expiro")
-        
-        else:
-            # La fecha actual está dentro del rango del descuento, retornar el porcentaje de descuento
-            return descuento_cliente.descuento.percentage  # Retorna el porcentaje de descuento asociado al cliente
-        
+            return descuento_cliente.descuento.percentage
+
     except Customer_discount.DoesNotExist:
-        return None  # No se encontró una apertura de caja sin cierre
+        return None  # No se encontró descuento asociado al cliente
+
+    
 
 def obtener_id_apertura_caja():
     try:
@@ -57,11 +57,11 @@ def num_transacciones(cierre_id):
 def crear_transaccion(transaccion_data, plan_name, email):
 
     try:
-
-        print(123)
         
         id_caja = obtener_id_apertura_caja()
         descuento = validar_descuento(email)
+
+        print(descuento)
 
         if descuento is False:
             raise HTTPException(status_code=400, detail="El descuento ya expiro")
