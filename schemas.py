@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import date, datetime
+from datetime import date
 
 #region Usuarios
 class UsuarioBase(BaseModel):
@@ -116,14 +116,4 @@ class PlanesCreate(PlanesBase):
 
 class Planes(PlanesBase):
     id: int
-#endregion
-
-#region Caja
-
-class ReturnTransaccion(BaseModel):
-    fecha: str
-    cantidad_final: float
-    diferencia: float
-    usuario_cierre: str
-
 #endregion

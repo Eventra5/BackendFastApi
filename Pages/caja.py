@@ -1,7 +1,5 @@
 from database import AperturaCaja, CierreCaja, User, Transacciones
 
-from peewee import fn
-
 from MySQLdb import IntegrityError
 
 from fastapi import HTTPException

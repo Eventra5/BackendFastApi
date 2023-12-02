@@ -8,31 +8,18 @@ from peewee import DoesNotExist
 
 from fastapi import HTTPException
 
-from database import Customer_discount, Customer, Company, Discount
+from database import Customer
 
 import Qr.Qr_personalized as Qr_personalized_page
 
 def data_customer(customer_email):
+
     try:
-        customer_discount = Customer_discount.select().where(Customer_discount.customer_email == customer_email)
 
-        # Obtiene los datos del cliente desde la base de datos
         customer = Customer.get(Customer.email == customer_email)
-        nombre = customer.name
-        apellido = customer.last_name
-
-
-        # Obtiene datos de la empresa y el descuento desde la base de datos
-        customer_company = customer_discount.get()  # Obtiene el primer registro de la consulta
-        company = Company.get(Company.name == customer_company.company_name)    
-
-        discount = Discount.get(Discount.id == customer_company.descuento_id)
 
         # Ahora puedes utilizar los datos para generar el código QR
-        data = f"""Nombre: {nombre} Apellido: {apellido}\n
-        ID Empresa: {company.id} Empresa: {company.name}\n
-        ID Descuento: {discount.id}Descuento: {discount.percentage}\n%
-        Fecha de inicio {customer_company.fecha_inicio} Fecha de vencimiento {customer_company.fecha_fin}"""
+        data = f"""{customer.email}"""
 
         return data
 

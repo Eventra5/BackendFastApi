@@ -9,7 +9,7 @@ from database import User, Company, Discount, Customer, Customer_discount, Apert
 from database import create_database
 
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
-from schemas import UsuarioBase, DiscountBase, AbrirCajaBase, ReturnTransaccion
+from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
 
 import Pages.users as user_page
 import Pages.companys as company_page
