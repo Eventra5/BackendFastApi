@@ -16,7 +16,6 @@ class User(Model):
     name = CharField()
     last_name = CharField()
     email = CharField()
-    salt = CharField() 
     rol = CharField(max_length=5, constraints=[Check('rol IN (\'admin\', \'user\')')])
     fecha_registro = CharField()
 
@@ -77,7 +76,6 @@ class Customer_discount(Model):
         database = DB
         table_name = 'customer_discount'
 
-# Define el modelo de "abrir caja"
 class AperturaCaja(Model):
     id = AutoField()
     cantidad_inicial = FloatField()
@@ -89,7 +87,6 @@ class AperturaCaja(Model):
         database = DB
         table_name = 'box_open'
 
-# Define el modelo de "cierre de caja"
 class CierreCaja(Model):
     id = AutoField()
     cantidad_final = FloatField()
@@ -125,6 +122,24 @@ class Planes_cobro(Model):
     class Meta:
         database = DB
         table_name = 'planes_cobro'
+
+class Info_parking(Model):
+
+    id = AutoField()
+    rfc = CharField()
+    nombre = CharField()
+    domicilio = CharField()
+    estado = CharField()
+    codigo_postal = CharField()
+    email = CharField()
+    tel = CharField()
+
+    def __str__(self):
+        return self.name
+    
+    class Meta:
+        database = DB
+        table_name = 'info_parking'
 
 def create_database(nombre_base_de_datos):
 

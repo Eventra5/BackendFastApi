@@ -8,8 +8,6 @@ from fastapi import HTTPException
 
 from peewee import OperationalError
 
-from Passwords.password import hashed_password
-
 ###############################################################################
 
 def create_username (name: str, last_name:str):
@@ -66,21 +64,17 @@ async def create_user(user_request):
 
     username = create_username(user_request.name, user_request.last_name)
 
-    password_hashed, salt = hashed_password(user_request.password)
-
     try:
         user = User.create(
             username=username,
             name=user_request.name,
             last_name=user_request.last_name,
             password=user_request.password,
-            rol=user_request.rol,  # Asegúrate de usar roles válidos aquí
+            rol=user_request.rol, 
             email=user_request.email,
-            salt=salt,
             fecha_registro=date.today().strftime("%d/%m/%Y")
         )
 
-        
     except OperationalError as e:
         if "Check constraint 'users_chk_1' is violated" in str(e):
             raise HTTPException(status_code=400, detail="El valor proporcionado para 'rol' no es válido. Use 'admin' o 'user'.")

@@ -37,8 +37,6 @@ def validar_descuento(email: str):
     except Customer_discount.DoesNotExist:
         return None  # No se encontró descuento asociado al cliente
 
-    
-
 def obtener_id_apertura_caja():
     try:
         # Buscar la última apertura de caja que no tiene cierre asociado

@@ -5,13 +5,11 @@ from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
-from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro
+from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro, Info_parking
 from database import create_database
 
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
 from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
-
-from peewee import DoesNotExist
 
 import Pages.users as user_page
 import Pages.companys as company_page
@@ -54,6 +52,8 @@ def startup():
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
     connection.create_tables([Planes_cobro])
+    connection.create_tables([Info_parking])
+
 
 @app.on_event('shutdown')
 def shutdown():
@@ -73,7 +73,6 @@ async def login(request_login: OAuth2PasswordRequestForm = Depends()):
     return await login_page.login_user(request_login)
     
 #endregion
-
 
 #Peticiones para los usuarios
 #region users
@@ -113,7 +112,7 @@ async def get_all_companies():
 async def create_company(company_request: CompanyCreate):
     return await company_page.create_company(company_request)
 
-@app.delete('/company/{company_name}', tags=["Company"])
+@app.delete('/company/{company}', tags=["Company"])
 async def delete_company(company: str):
     return await company_page.delete_company(company)
 #endregion
@@ -150,12 +149,12 @@ async def get_all_customers():
     return await customer_page.get_all_customers()
 
 @app.post("/customer/{company}", tags=["Customer"])
-async def create_customer(request_customer: CustomerCreate, company: str, id: int):
-    return await customer_page.create_customer(request_customer, company, id)
+async def create_customer(request_customer: CustomerCreate, id: int):
+    return await customer_page.create_customer(request_customer, id)
 
-@app.post("/customer-discount/{company}", tags=["Customer"])
-async def create_customer(id: int, company: str, email: str):
-    return await customer_page.create_discount(id, company, email)
+@app.post("/customer-discount/{id}", tags=["Customer"])
+async def create_customer(id: int, email: str, fecha_fin: str):
+    return await customer_page.create_discount(id, email, fecha_fin)
 
 @app.delete("/customer/{email}", tags=["Customer"])
 async def delete_customer(email: str):
@@ -165,6 +164,7 @@ async def delete_customer(email: str):
 
 #Peticiones para la caja
 #region caja
+
 @app.post("/abrir-caja", tags=["Caja"])
 async def abrir_caja(request_caja: AbrirCajaBase):
     return await caja_page.abrir_caja(request_caja)
@@ -173,9 +173,6 @@ async def abrir_caja(request_caja: AbrirCajaBase):
 async def cerrar_caja(username: str):
     return await caja_page.cerrar_caja(username)
 
-@app.post("/ultimacaja/", tags=["Caja"])
-async def caja(id: int):
-    return await caja_page.Calcular_total(id)
 #endregion 
 
 #region transacciones
@@ -183,14 +180,6 @@ async def caja(id: int):
 @app.post("/transaccion", tags=["Transacciones"])
 async def transaccion(transaccion_data: TransaccionCreate, plan: str, email: Optional[str] = None):
     return transacciones_page.crear_transaccion(transaccion_data, plan, email)
-
-@app.post("/num-transacciones/", tags=["Transacciones"])
-async def transacciones(cierre_id):
-    return transacciones_page.num_transacciones(cierre_id)
-
-@app.post("/validar-descuento/", tags=["Transacciones"])
-async def transacciones(email: str):
-    return transacciones_page.validar_descuento(email)
 
 #endregion
 
@@ -214,6 +203,8 @@ async def delete_plan(plan_name: str):
     return await plan_page.delete_plan(plan_name)
 
 #endregion
+
+
 
 
 #env\scripts\activate.bat

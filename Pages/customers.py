@@ -40,20 +40,15 @@ async def get_all_customers():
 
     return [{"id": customer.id, "name": customer.name, "last name": customer.last_name, "email": customer.email} for customer in customer]
 
-async def create_customer(request_customer, company_name, discount_id):
+async def create_customer(request_customer, id):
 
     try:
-
-        company = Company.get(Company.name == company_name)
 
         # Verificar si el correo electrónico ya está en uso
         if Customer.select().where(Customer.email == request_customer.email).exists():
             raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
         
-        if not Discount.select().where(Discount.company == company).exists():
-            raise HTTPException(status_code=404, detail="El descuento no existe")
-        
-        if not Discount.select().where(Discount.id == discount_id).exists():
+        if not Discount.select().where(Discount.id == id).exists():
             raise HTTPException(status_code=404, detail="El descuento no existe")
         
         customer = Customer.create(
@@ -65,16 +60,15 @@ async def create_customer(request_customer, company_name, discount_id):
         
         # Obtener la empresa y el descuento existentes
         customer = Customer.get(Customer.email == request_customer.email)
-        company = Company.get(Company.name == company_name)
-        discount = Discount.get_by_id(discount_id)
+        discount = Discount.get(Discount.id == id)
 
 
         Customer_discount.create(
-            customer=customer,
-            company=company,
-            descuento=discount,
+            customer= customer,
+            company= discount.company,
+            descuento= discount.id,
             fecha_inicio = date.today(),
-            fecha_fin = "2023/10/01",           
+            fecha_fin = request_customer.fecha_fin,           
         )
 
         #Enviar_Qr.send_email(request_customer.email)
@@ -90,18 +84,13 @@ async def create_customer(request_customer, company_name, discount_id):
     except OperationalError as e:
         raise HTTPException(status_code=500, detail=f"Error de operación de base de datos: {str(e)}")
 
-async def create_discount(id, company, email):
+async def create_discount(id, email, fecha_fin):
 
     try:
-
-        company = Company.get(Company.name == company)
         
                 # Verificar si el correo electrónico ya está en uso
         if not Customer.select().where(Customer.email == email).exists():
             raise HTTPException(status_code=400, detail="El cliente no existe")
-        
-        if not Discount.select().where(Discount.company == company).exists():
-            raise HTTPException(status_code=404, detail="El descuento no existe")
         
         if not Discount.select().where(Discount.id == id).exists():
             raise HTTPException(status_code=404, detail="El descuento no existe")
@@ -109,17 +98,17 @@ async def create_discount(id, company, email):
         
         # Obtener la empresa y el descuento existentes
         customer = Customer.get(Customer.email == email)
-        discount = Discount.get_by_id(id)
+        discount = Discount.get(Discount.id == id)
 
         customer.descuento = True
         customer.save()  # Guardar el cambio en la base de datos
 
         Customer_discount.create(
             customer=customer,
-            company=company,
-            descuento=discount,
+            company=discount.company,
+            descuento=discount.id,
             fecha_inicio = date.today(),
-            fecha_fin = "2023/11/01"
+            fecha_fin = fecha_fin
         )
 
         #Enviar_Qr.send_email(request_customer.email)

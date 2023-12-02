@@ -84,7 +84,6 @@ class UserLogin(BaseModel):
 class AbrirCajaBase(BaseModel):
     cantidad_inicial: float
     username: str
-    fecha: datetime
 
 
 class CrearCaja(AbrirCajaBase):
@@ -117,3 +116,18 @@ class PlanesCreate(PlanesBase):
 class Planes(PlanesBase):
     id: int
 #endregion
+
+class EstacionamietoInfoBase(BaseModel):
+    rfc: str
+    nombre: str
+    domicilio: str
+    estado: str
+    codigo_postal: str
+    email: str
+    tel: str
+
+class estacionamiento_info_create(EstacionamietoInfoBase):
+    pass
+
+class estacionamiento_info(EstacionamietoInfoBase):
+    id: int

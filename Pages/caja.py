@@ -24,8 +24,6 @@ def Calcular_total(id: int):
     except Transacciones.DoesNotExist:
         return 0.0
 
-    
-
 async def abrir_caja(request_caja: CrearCaja):
 
     # Verifica que el usuario de apertura exista
