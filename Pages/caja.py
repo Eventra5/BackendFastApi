@@ -13,13 +13,14 @@ from datetime import datetime
 ###############################################################################
 
 def Calcular_total(id: int):
-
     try:
         total_montos = Transacciones.select(fn.SUM(Transacciones.monto)).where(
             Transacciones.apertura_caja == id
         ).scalar()
 
-        return total_montos if total_montos is not None else 0.0
+        total_redondeado = round(total_montos, 2) if total_montos is not None else 0.0
+
+        return total_redondeado
     
     except Transacciones.DoesNotExist:
         return 0.0
@@ -41,7 +42,7 @@ async def abrir_caja(request_caja: CrearCaja):
     try:
         abrir_caja = AperturaCaja.create(
             usuario_apertura = request_caja.username,
-            cantidad_inicial = 1000.0,
+            cantidad_inicial = request_caja.cantidad_inicial,
             fecha = datetime.now(),
             estado=True  # Marca la apertura como activa
         )
@@ -59,9 +60,12 @@ async def cerrar_caja(username):
     if not ultima_apertura:
         raise HTTPException(status_code=400, detail="No existe una caja abierta para cerrar.")
     
-    total_cobros = Calcular_total(1)
+    total_cobros = Calcular_total(ultima_apertura)
     cantidad_final = total_cobros + ultima_apertura.cantidad_inicial
+
     diferencia = cantidad_final - ultima_apertura.cantidad_inicial
+    diferencia = round(diferencia, 2)
+
     
     # Registrar el cierre de caja
     cierre = CierreCaja.create(
@@ -72,8 +76,17 @@ async def cerrar_caja(username):
         apertura_caja=ultima_apertura,  # Vincula el cierre a la apertura correspondiente
     )
     
+    fecha_formateada = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    cierre_data = {
+        "fecha": fecha_formateada,
+        "cantidad_final": cierre.cantidad_final,
+        "cantidad_inicial": ultima_apertura.cantidad_inicial,
+        "ganancia": cierre.diferencia,
+    }
+
     # Marcar la apertura de caja como cerrada
     ultima_apertura.estado = False
     ultima_apertura.save()
     
-    return {"message": "Caja cerrada con éxito."}
+    return cierre_data

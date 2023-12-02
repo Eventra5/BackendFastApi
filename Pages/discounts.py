@@ -41,6 +41,19 @@ async def get_discount_name(company_name: str):
         # Maneja cualquier otro error que pueda ocurrir
         raise HTTPException(status_code=500, detail="Error interno del servidor")
     
+async def get_all_discounts():
+
+    discount_info = list(Discount.select())
+
+    return [
+        {
+            "id": discount.id,
+            "company_name": discount.company.name,
+            "percentage": discount.percentage
+        }
+        for discount in discount_info
+    ]
+
 async def create_discount(discount: DiscountCreate, company_name: str):
     # Validar los datos de entrada utilizando Pydantic
     discount_data = discount.dict()

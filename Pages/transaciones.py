@@ -59,8 +59,6 @@ def crear_transaccion(transaccion_data, plan_name, email):
         id_caja = obtener_id_apertura_caja()
         descuento = validar_descuento(email)
 
-        print(descuento)
-
         if descuento is False:
             raise HTTPException(status_code=400, detail="El descuento ya expiro")
         
@@ -73,8 +71,7 @@ def crear_transaccion(transaccion_data, plan_name, email):
             calcular_monto = cobros.funciones_por_plan[plan_name]
 
             # Calcula el costo utilizando la función seleccionada
-            monto = calcular_monto(plan_name, descuento)
-            print(monto)
+            monto = calcular_monto(transaccion_data.fecha_expedicion, plan_name, descuento)
 
         else:
             raise HTTPException(status_code=400, detail="Plan no encontrado o sin función asociada")
@@ -88,7 +85,7 @@ def crear_transaccion(transaccion_data, plan_name, email):
             apertura_id=id_caja
         )
 
-        return {"message": f"Transacción creada exitosamente {'/n'} el monto es: {monto}"}
+        return monto
 
     except HTTPException as http_exc:
         raise http_exc
