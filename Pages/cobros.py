@@ -14,7 +14,7 @@ def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
         costo_base = plan_info.costo_base
         costo_hora = plan_info.costo_hora
 
-        fecha_expedicion = '2023-11-03 13:46:01'  # Asegúrate de que la hora tenga dos dígitos en el formato (02 en lugar de 2)
+        fecha_expedicion = '2023-12-01 19:06:01'  # Asegúrate de que la hora tenga dos dígitos en el formato (02 en lugar de 2)
 
         # Convertir la fecha de expedición en un objeto datetime
         fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
@@ -53,7 +53,7 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
 
-        fecha_expedicion = '2023-11-03 13:46:01'  
+        fecha_expedicion = '2023-12-01 20:16:01'
         fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
 
         # Obtener la hora actual del sistema
@@ -91,7 +91,7 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
         aumento = plan_info.aumento
 
         # Obtener la fecha de expedición (simulada para propósitos de demostración)
-        fecha_expedicion_str = '2023-11-03 13:46:01'  # Formato: 'YYYY-MM-DD HH:MM:SS'
+        fecha_expedicion_str = '2023-11-30 20:28:01' 
         fecha_expedicion = datetime.strptime(fecha_expedicion_str, "%Y-%m-%d %H:%M:%S")
 
         # Obtener la fecha y hora actuales del sistema
@@ -104,8 +104,9 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
         dias_transcurridos = diferencia_segundos // (24 * 3600)
         horas_restantes = (diferencia_segundos % (24 * 3600)) // 3600
 
-        # Calcular el costo basado en la tarifa diaria y tarifa por hora adicional
-        costo_base = costo_base * dias_transcurridos + aumento * horas_restantes
+        # Verificar si han pasado los días y aplicar el aumento
+        if dias_transcurridos > 0:
+            costo_base += aumento * dias_transcurridos
 
         if descuento is not None:
             costo_base -= (costo_base * descuento) / 100  # Aplicar el descuento
@@ -125,6 +126,6 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
     
 funciones_por_plan = {
     "hora": cobro_hora,
-    "fracccion": cobro_fraccion,
+    "fraccion": cobro_fraccion,
     "dia": cobro_dia,
 }

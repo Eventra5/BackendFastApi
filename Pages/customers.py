@@ -13,24 +13,33 @@ async def get_customer_companies(customer_email: str):
     try:
         # Obtener los registros de Customer_company para un cliente específico
         customer_companies = Customer_discount.select().where(Customer_discount.customer_email == customer_email)
-        
-        # Crear una lista de resultados como diccionarios
-        results = [
+        customer = Customer.select().where(Customer.email == customer_email)
+
+        results1 = [
             {
-                "id": cc.id,
-                "customer_email": cc.customer.email,  # Acceder al objeto Customer y luego al atributo email
-                "company_name": cc.company.name,  # Acceder al objeto Company y luego al atributo name
-                "discount": {
-                    "id": cc.descuento.id,
-                    "percentage": cc.descuento.percentage,
-                    "start_date": cc.descuento.start_date.strftime("%d-%m-%Y"),
-                    "end_date": cc.descuento.end_date.strftime("%d-%m-%Y"),
-                },
+                "name": cc1.name,
+                "last_name": cc1.last_name,
+                "customer_email": cc1.email,  # Acceder al objeto Customer y luego al atributo email
             }
-            for cc in customer_companies
+            for cc1 in customer
         ]
         
-        return results
+        if Customer.select().where(Customer.descuento == 1):
+            results2 = [
+                {
+                    "discount_id": cc.descuento.id,
+                    "company": cc.company.name,
+                    "percentage": cc.descuento.percentage,
+                }
+                for cc in customer_companies
+            ]
+        else:
+            results2 = []
+            
+        # Combinar los resultados en un solo arreglo
+        combined_results = results1 + results2
+        
+        return combined_results
     
     except Customer.DoesNotExist:
         raise HTTPException(status_code=404, detail="El cliente no existe")

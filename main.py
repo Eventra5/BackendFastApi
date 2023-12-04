@@ -159,8 +159,8 @@ async def create_customer(id: int, email: str, fecha_fin: str):
 @app.delete("/customer/{email}", tags=["Customer"])
 async def delete_customer(email: str):
     return await customer_page.delete_customer(email)
-#endregion
 
+#endregion
 
 #Peticiones para la caja
 #region caja
