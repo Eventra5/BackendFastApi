@@ -6,15 +6,21 @@ from fastapi import HTTPException
 
 from datetime import datetime, timedelta
 
-def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
+def cobro_fraccion(fecha_expedicion: str, plan_name: str, descuento: Optional[float] = None):
 
     try:
 
+<<<<<<< HEAD
         plan_info = Planes_cobro.get(Planes_cobro.name == plan_name)
         costo_base = plan_info.costo_base
         costo_hora = plan_info.costo_hora
 
         fecha_expedicion = '2023-12-01 19:06:01'  # Asegúrate de que la hora tenga dos dígitos en el formato (02 en lugar de 2)
+=======
+        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        costo_base = plan_info.cobro_base
+        costo_hora = plan_info.aumento
+>>>>>>> 9bb55c8584e9f249c2609acab1f067bae85514bc
 
         # Convertir la fecha de expedición en un objeto datetime
         fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
@@ -33,7 +39,7 @@ def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
         # Aplicar el descuento si se proporciona
         if descuento is not None:
             costo_base -= (costo_base * descuento) / 100  # Aplicar el descuento
-
+        
         costo = round(costo_base, 2)
         return costo
 
@@ -45,7 +51,7 @@ def cobro_fraccion(plan_name: str, descuento: Optional[float] = None):
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
 
-def cobro_hora(plan_name: str, descuento: Optional[float] = None):
+def cobro_hora(fecha_expedicion: str, plan_name: str, descuento: Optional[float] = None):
 
     try:
         
@@ -53,7 +59,10 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
 
+<<<<<<< HEAD
         fecha_expedicion = '2023-12-01 20:16:01'
+=======
+>>>>>>> 9bb55c8584e9f249c2609acab1f067bae85514bc
         fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
 
         # Obtener la hora actual del sistema
@@ -80,8 +89,7 @@ def cobro_hora(plan_name: str, descuento: Optional[float] = None):
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
     
-
-def cobro_dia(plan_name: str, descuento: Optional[float] = None):
+def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] = None):
 
     try:
         # Obtener información del plan desde la base de datos
@@ -90,9 +98,13 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
 
+<<<<<<< HEAD
         # Obtener la fecha de expedición (simulada para propósitos de demostración)
         fecha_expedicion_str = '2023-11-30 20:28:01' 
         fecha_expedicion = datetime.strptime(fecha_expedicion_str, "%Y-%m-%d %H:%M:%S")
+=======
+        fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
+>>>>>>> 9bb55c8584e9f249c2609acab1f067bae85514bc
 
         # Obtener la fecha y hora actuales del sistema
         now = datetime.now()
@@ -121,9 +133,7 @@ def cobro_dia(plan_name: str, descuento: Optional[float] = None):
         return {"error": str(e)}  # Manejar errores de conversión de fecha
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
-    
-    
-    
+
 funciones_por_plan = {
     "hora": cobro_hora,
     "fraccion": cobro_fraccion,

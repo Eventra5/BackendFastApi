@@ -80,7 +80,7 @@ async def create_customer(request_customer, id):
             fecha_fin = request_customer.fecha_fin,           
         )
 
-        #Enviar_Qr.send_email(request_customer.email)
+        Enviar_Qr.send_email(request_customer.email)
 
         return {"message": "Cliente creado y asociado con éxito"}
 
@@ -120,7 +120,7 @@ async def create_discount(id, email, fecha_fin):
             fecha_fin = fecha_fin
         )
 
-        #Enviar_Qr.send_email(request_customer.email)
+        Enviar_Qr.send_email(email)
 
         return {"message": "Descuento asociado con éxito"}
 

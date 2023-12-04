@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import date, datetime
+from datetime import date
 
 #region Usuarios
 class UsuarioBase(BaseModel):
@@ -93,6 +93,7 @@ class CrearCaja(AbrirCajaBase):
 class TransaccionBase(BaseModel):
     transaccion: str
     username: str
+    fecha_expedicion: str
 
 class TransaccionCreate(TransaccionBase):
     pass
@@ -116,18 +117,3 @@ class PlanesCreate(PlanesBase):
 class Planes(PlanesBase):
     id: int
 #endregion
-
-class EstacionamietoInfoBase(BaseModel):
-    rfc: str
-    nombre: str
-    domicilio: str
-    estado: str
-    codigo_postal: str
-    email: str
-    tel: str
-
-class estacionamiento_info_create(EstacionamietoInfoBase):
-    pass
-
-class estacionamiento_info(EstacionamietoInfoBase):
-    id: int

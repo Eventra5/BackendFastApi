@@ -5,7 +5,7 @@ from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
-from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro, Info_parking
+from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro
 from database import create_database
 
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
@@ -52,8 +52,6 @@ def startup():
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
     connection.create_tables([Planes_cobro])
-    connection.create_tables([Info_parking])
-
 
 @app.on_event('shutdown')
 def shutdown():
@@ -127,6 +125,10 @@ async def get_discount(id: str):
 @app.get("/discounts/{company}", tags=["Discount"])
 async def get_discount_name(company: str):
     return await discounts_page.get_discount_name(company)
+
+@app.get("/all-discounts/", tags=["Discount"])
+async def get_all_discounts():
+    return await discounts_page.get_all_discounts()
 
 @app.post("/discount/{company}", response_model=DiscountBase, tags=["Discount"])
 async def create_discount(discount: DiscountCreate, company: str):

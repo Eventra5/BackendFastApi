@@ -123,24 +123,6 @@ class Planes_cobro(Model):
         database = DB
         table_name = 'planes_cobro'
 
-class Info_parking(Model):
-
-    id = AutoField()
-    rfc = CharField()
-    nombre = CharField()
-    domicilio = CharField()
-    estado = CharField()
-    codigo_postal = CharField()
-    email = CharField()
-    tel = CharField()
-
-    def __str__(self):
-        return self.name
-    
-    class Meta:
-        database = DB
-        table_name = 'info_parking'
-
 def create_database(nombre_base_de_datos):
 
     config = {
