@@ -8,6 +8,8 @@ from schemas import CrearCaja
 
 from datetime import datetime
 
+from peewee import fn
+
 ###############################################################################
 
 def Calcular_total(id: int):

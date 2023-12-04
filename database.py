@@ -2,10 +2,10 @@ from peewee import *
 import mysql.connector
 
 DB = MySQLDatabase(
-    'estacionamiento',
-    user = 'root',
-    password = 'dali12345',
-    host = 'localhost',
+    'bqkgtfshna68hgavk0o4',
+    user = 'uudlphkp9yybycr3',
+    password = 'FzSVvJF39BEVpr0ULdoC',
+    host = 'bqkgtfshna68hgavk0o4-mysql.services.clever-cloud.com',
     port = 3306
 )
 
