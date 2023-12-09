@@ -21,7 +21,19 @@ async def get_all_companies():
 
     company_info = list(Company.select())
 
-    return [{"id": company.id, "name": company.name} for company in company_info]
+    return [
+        {
+            "id": company.id,
+            "name": company.name,
+            "rfc": company.rfc,
+            "tel": company.tel,
+            "email": company.email,
+            "cp": company.cp,
+            "domicilio": company.domicilio,
+
+        } 
+
+        for company in company_info]
     
 async def create_company(company_request: CompanyCreate):
 
@@ -30,11 +42,34 @@ async def create_company(company_request: CompanyCreate):
         raise HTTPException(status_code=400, detail="La empresa ya esta registrada")
 
     company = Company.create(
+        cp = company_request.cp,
+        tel = company_request.tel,
+        rfc = company_request.rfc,
         name = company_request.name,
+        email = company_request.email,
+        domicilio = company_request.domicilio,
     )
 
     return company
 
+async def update_company(request_company, id):
+
+    company = Company.get_or_none(Company.id == id)
+
+    if company:
+        # Actualiza los campos del usuario con los valores proporcionados
+        company.cp = request_company.cp
+        company.rfc = request_company.rfc
+        company.tel = request_company.tel
+        company.name = request_company.name
+        company.email = request_company.email
+        company.domicilio = request_company.domicilio
+        company.save()
+
+        return {"mensaje": "Datos actualizados exitosamente"}
+    else:
+        raise HTTPException(status_code=404, detail=f"ID: '{id}' no encontrado")
+    
 async def delete_company(company):
     try:
         with DB.atomic():

@@ -1,5 +1,5 @@
 from MySQLdb import IntegrityError, OperationalError
-from database import Customer, Customer_discount, Company, Discount, DB
+from database import Customer, CustomerDiscount, Company, Discount, DB
 
 from peewee import DoesNotExist
 
@@ -12,7 +12,7 @@ import Email.Enviar_Qr as Enviar_Qr
 async def get_customer_companies(customer_email: str):
     try:
         # Obtener los registros de Customer_company para un cliente específico
-        customer_companies = Customer_discount.select().where(Customer_discount.customer_email == customer_email)
+        customer_companies = CustomerDiscount.select().where(CustomerDiscount.customer_email == customer_email)
         customer = Customer.select().where(Customer.email == customer_email)
 
         results1 = [
@@ -72,7 +72,7 @@ async def create_customer(request_customer, id):
         discount = Discount.get(Discount.id == id)
 
 
-        Customer_discount.create(
+        CustomerDiscount.create(
             customer= customer,
             company= discount.company,
             descuento= discount.id,
@@ -112,7 +112,7 @@ async def create_discount(id, email, fecha_fin):
         customer.descuento = True
         customer.save()  # Guardar el cambio en la base de datos
 
-        Customer_discount.create(
+        CustomerDiscount.create(
             customer=customer,
             company=discount.company,
             descuento=discount.id,
@@ -141,7 +141,7 @@ async def delete_customer(customer_email: str):
             customer = Customer.get(Customer.email == customer_email)
 
             # Elimina los registros relacionados en la tabla Customer_company
-            Customer_discount.delete().where(Customer_discount.customer == customer).execute()
+            CustomerDiscount.delete().where(CustomerDiscount.customer == customer).execute()
 
             # Finalmente, elimina el cliente
             customer.delete_instance()

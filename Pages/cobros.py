@@ -1,6 +1,6 @@
 from typing import Optional
 
-from database import Planes_cobro
+from database import PlanesCobro
 
 from fastapi import HTTPException
 
@@ -76,13 +76,12 @@ def cobro_hora(fecha_expedicion: str, plan_name: str, descuento: Optional[float]
         return {"error": str(e)}  # Manejar errores de conversión de fecha
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
-    
-    
+
 def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] = None):
 
     try:
         # Obtener información del plan desde la base de datos
-        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        plan_info = PlanesCobro.get(PlanesCobro.plan == plan_name)
 
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
@@ -109,7 +108,7 @@ def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] 
         costo = round(costo_base, 2)
         return costo    
 
-    except Planes_cobro.DoesNotExist as e:
+    except PlanesCobro.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
     except ValueError as e:

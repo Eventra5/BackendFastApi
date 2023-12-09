@@ -2,10 +2,10 @@ from peewee import *
 import mysql.connector
 
 DB = MySQLDatabase(
-    'bqkgtfshna68hgavk0o4',
-    user = 'uudlphkp9yybycr3',
-    password = 'FzSVvJF39BEVpr0ULdoC',
-    host = 'bqkgtfshna68hgavk0o4-mysql.services.clever-cloud.com',
+    'estacionamiento',
+    user = 'root',
+    password = 'dali12345',
+    host = 'localhost',
     port = 3306
 )
 
@@ -28,8 +28,13 @@ class User(Model):
 
 class Company(Model):
     id = AutoField(primary_key=True)
+    cp = CharField(max_length=5)
+    tel = CharField(max_length=20)
+    rfc = CharField(max_length=13)
     name = CharField(max_length=50, unique=True)
-
+    email = CharField()
+    domicilio = CharField(max_length=100)
+    
     def __str__(self):
         return self.name
     
@@ -64,7 +69,7 @@ class Customer(Model):
         database = DB
         table_name = 'customers'
 
-class Customer_discount(Model):
+class CustomerDiscount(Model):
     
     customer = ForeignKeyField(Customer, backref='customer_companies', column_name='customer_email', to_field='email')
     company = ForeignKeyField(Company, backref='company_customers', column_name='company_name', to_field='name')
@@ -110,11 +115,11 @@ class Transacciones(Model):
         database = DB
         table_name = 'transacciones'
 
-class Planes_cobro(Model):
+class PlanesCobro(Model):
     id = AutoField()
     plan = CharField(unique= True)
     cobro_base = FloatField()
-    aumento = FloatField()
+    aumento = FloatField(null=True)
 
     def __str__(self):
         return self.name
@@ -122,6 +127,33 @@ class Planes_cobro(Model):
     class Meta:
         database = DB
         table_name = 'planes_cobro'
+
+class InfoCompanyWeb(Model):
+
+    id = AutoField(primary_key=True)
+    name = CharField(max_length=50, unique=True)
+    logo = CharField(max_length=255, null=True) 
+
+
+    class Meta:
+        database = DB
+        table_name = 'info_company'
+
+class InfoCompanyLegal(Model):
+
+    id = AutoField(primary_key=True)
+    cp = CharField(max_length=5)
+    rfc = CharField(max_length=13)
+    tel = CharField(max_length=20)
+    name = CharField(max_length=50)
+    correo = CharField(max_length=50)
+    estado = CharField(max_length=20)
+    municipio = CharField(max_length=20)
+    domicilio = CharField(max_length=100)
+
+    class Meta:
+        database = DB
+        table_name = 'info_company_legal'
 
 def create_database(nombre_base_de_datos):
 

@@ -5,10 +5,10 @@ from fastapi import FastAPI, Depends
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 from database import DB as connection 
-from database import User, Company, Discount, Customer, Customer_discount, AperturaCaja, CierreCaja, Transacciones, Planes_cobro
+from database import User, Company, Discount, Customer, CustomerDiscount, AperturaCaja, CierreCaja, Transacciones, PlanesCobro, InfoCompanyWeb, InfoCompanyLegal
 from database import create_database
 
-from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate
+from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate, MyCompanyCreate, InfoCompanyCreate
 from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
 
 import Pages.users as user_page
@@ -19,6 +19,7 @@ import Pages.login as login_page
 import Pages.caja as caja_page
 import Pages.planes_cobro as plan_page
 import Pages.transaciones as transacciones_page
+import Pages.config_company as cc_page
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -47,11 +48,13 @@ def startup():
     connection.create_tables([Company])
     connection.create_tables([Discount])
     connection.create_tables([Customer])
-    connection.create_tables([Customer_discount])
+    connection.create_tables([CustomerDiscount])
     connection.create_tables([AperturaCaja])
     connection.create_tables([CierreCaja])
     connection.create_tables([Transacciones])
-    connection.create_tables([Planes_cobro])
+    connection.create_tables([PlanesCobro])
+    connection.create_tables([InfoCompanyWeb])
+    connection.create_tables([InfoCompanyLegal])
 
 @app.on_event('shutdown')
 def shutdown():
@@ -109,6 +112,10 @@ async def get_all_companies():
 @app.post("/company", response_model=CompanyResponse, tags=["Company"])
 async def create_company(company_request: CompanyCreate):
     return await company_page.create_company(company_request)
+
+@app.put("/company/{id}", tags=["Company"])
+async def update_company(company_request: CompanyCreate, id: int):
+    return await company_page.update_company(company_request, id)
 
 @app.delete('/company/{company}', tags=["Company"])
 async def delete_company(company: str):
@@ -206,12 +213,40 @@ async def delete_plan(plan_name: str):
 
 #endregion
 
+#Peticions para configurar la empresa
+
+@app.get("/config-web", tags=["Config Web"])
+async def get_web():
+    return await cc_page.get_info_web()
+
+@app.post("/config-web", tags=["Config Web"])
+async def create_web(request_company: MyCompanyCreate):
+    return await cc_page.create_info_web(request_company)
+
+@app.put("/config-web/{id}", tags=["Config Web"])
+async def update_web(request_company: MyCompanyCreate, id: int):
+    return await cc_page.update_info_web(request_company, id)
+
+@app.delete("/config-web/{id}", tags=["Config Web"])
+async def delete_web(id: int):
+    return await cc_page.delete_info_web(id)
 
 
+@app.get("/config-company", tags=["Config company"])
+async def get_company():
+    return await cc_page.get_info_legal()
+
+@app.post("/config-company", tags=["Config company"])
+async def create_company(request_company: InfoCompanyCreate):
+    return await cc_page.create_info_legal(request_company)
+
+@app.put("/config-company/{id}", tags=["Config company"])
+async def update_company(request_company: InfoCompanyCreate, id: int):
+    return await cc_page.update_info_legal(request_company, id)
+
+@app.delete("/config-company/{id}", tags=["Config company"])
+async def delete_company(id: int):
+    return await cc_page.delete_info_legal(id)
 
 #env\scripts\activate.bat
 #uvicorn main:app --reload
-#pip install peewee
-#pip install mysql
-#pip install sqlalchemy
-#pip install bcrypt

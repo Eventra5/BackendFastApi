@@ -55,7 +55,7 @@ async def get_user(username):
 async def get_all_users():
     users = list(User.select())
 
-    return [{"id": user.id, "name": user.name, "email": user.email, "username": user.username, "password": user.password} for user in users]
+    return [{"cp": user.id, "name": user.name, "email": user.email, "username": user.username, "password": user.password} for user in users]
 
 async def create_user(user_request):
 

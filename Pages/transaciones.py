@@ -1,4 +1,4 @@
-from database import AperturaCaja, CierreCaja ,Transacciones, Customer_discount, Customer
+from database import AperturaCaja, CierreCaja ,Transacciones, CustomerDiscount, Customer
 from datetime import datetime, date
 from fastapi import HTTPException
 import Pages.cobros as cobros
@@ -19,7 +19,7 @@ def validar_descuento(email: str):
         if not customer.descuento:
             raise HTTPException(status_code=400, detail="No hay descuento asociado")
 
-        descuento_cliente = Customer_discount.get(Customer_discount.customer == customer)
+        descuento_cliente = CustomerDiscount.get(CustomerDiscount.customer == customer)
 
         fecha_inicio = descuento_cliente.fecha_inicio
         fecha_fin = descuento_cliente.fecha_fin

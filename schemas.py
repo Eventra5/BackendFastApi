@@ -22,6 +22,12 @@ class Usuario(UsuarioBase):
 #region Empresas
 class CompanyBase(BaseModel):
     name: str = Field(..., max_length=50)
+    tel: str
+    email: EmailStr
+    rfc: str
+    cp: str
+    domicilio: str
+
 
 class CompanyCreate(CompanyBase):
     pass
@@ -116,4 +122,33 @@ class PlanesCreate(PlanesBase):
 
 class Planes(PlanesBase):
     id: int
+#endregion
+
+#region Config company
+class MyCompanyBase(BaseModel):
+    name: str
+    logo: str
+
+class MyCompanyCreate(MyCompanyBase):
+    pass
+
+
+#endregion 
+
+#region Info company
+
+class InfoCompanyBase(BaseModel):
+    cp: str
+    rfc: str
+    tel: str
+    name: str
+    correo: EmailStr
+    estado: str
+    municipio: str
+    domicilio: str
+
+class InfoCompanyCreate(InfoCompanyBase):
+    pass
+
+
 #endregion
