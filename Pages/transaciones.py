@@ -1,4 +1,4 @@
-from database import AperturaCaja, CierreCaja ,Transacciones, CustomerDiscount, Customer
+from database import AperturaCaja, CierreCaja ,Transacciones, CustomerDiscount, Customer, User, Discount
 from datetime import datetime, date
 from fastapi import HTTPException
 import Pages.cobros as cobros
@@ -34,7 +34,7 @@ def validar_descuento(email: str):
 
             return descuento_cliente.descuento.percentage
 
-    except Customer_discount.DoesNotExist:
+    except CustomerDiscount.DoesNotExist:
         return None  # No se encontró descuento asociado al cliente
 
 def obtener_id_apertura_caja():
@@ -76,6 +76,8 @@ def crear_transaccion(transaccion_data, plan_name, email):
         else:
             raise HTTPException(status_code=400, detail="Plan no encontrado o sin función asociada")
         
+        print(monto)
+        
         transaccion = Transacciones.create(
 
             transaccion=transaccion_data.transaccion,
@@ -84,7 +86,7 @@ def crear_transaccion(transaccion_data, plan_name, email):
             user=transaccion_data.username,
             apertura_id=id_caja
         )
-
+        
         return monto
 
     except HTTPException as http_exc:
@@ -93,3 +95,66 @@ def crear_transaccion(transaccion_data, plan_name, email):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
         
+def transaccion_suscripcion(transaccion_data, id, email):
+
+    try:
+        
+        id_caja = obtener_id_apertura_caja()
+        
+        if id_caja is None:
+            raise HTTPException(status_code=400, detail="No hay una caja abierta actualmente. Abra una caja para realizar transacciones.")
+        
+        if not Customer.select().where(Customer.email == email).exists():
+            raise HTTPException(status_code=404, detail="El cliente no existe")
+        
+        if not User.select().where(User.username == transaccion_data.username).exists():
+            raise HTTPException(status_code=404, detail="El usuario no existe")
+        
+        plan_name = "suscripcion"
+
+        if plan_name in cobros.funciones_por_plan:
+
+            calcular_monto = cobros.funciones_por_plan[plan_name]
+
+            monto = calcular_monto(id)
+
+        else:
+            raise HTTPException(status_code=400, detail="Plan no encontrado o sin función asociada")
+        
+        transaccion = Transacciones.create(
+
+            transaccion="suscripcion",
+            monto=monto,
+            fecha=datetime.now(),
+            user=transaccion_data.username,
+            apertura_id=id_caja
+        )
+
+        # Obtener la empresa y el descuento existentes
+        customer = Customer.get(Customer.email == email)
+        discount = Discount.get(Discount.id == id)
+
+        customer.descuento = True
+        customer.save()  # Guardar el cambio en la base de datos
+
+
+        CustomerDiscount.create(
+            customer=customer,
+            company=discount.company,
+            descuento=discount.id,
+            fecha_inicio = date.today(),
+            fecha_fin = transaccion_data.fecha_fin
+        )
+
+
+        return monto
+
+
+    except User.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=f"El username: {transaccion_data.username} no fue encontrado")
+    
+    except HTTPException as http_exc:
+        raise http_exc
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))

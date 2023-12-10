@@ -9,6 +9,8 @@ from datetime import date
 
 import Email.Enviar_Qr as Enviar_Qr
 
+import Pages.transaciones as transaccion_suscripcion
+
 async def get_customer_companies(customer_email: str):
     try:
         # Obtener los registros de Customer_company para un cliente específico
@@ -49,7 +51,7 @@ async def get_all_customers():
 
     return [{"id": customer.id, "name": customer.name, "last name": customer.last_name, "email": customer.email} for customer in customer]
 
-async def create_customer(request_customer, id):
+async def create_customer(request_customer):
 
     try:
 
@@ -57,72 +59,13 @@ async def create_customer(request_customer, id):
         if Customer.select().where(Customer.email == request_customer.email).exists():
             raise HTTPException(status_code=400, detail="El correo electrónico ya está en uso")
         
-        if not Discount.select().where(Discount.id == id).exists():
-            raise HTTPException(status_code=404, detail="El descuento no existe")
-        
         customer = Customer.create(
             name= request_customer.name,
             last_name= request_customer.last_name,
             email= request_customer.email,
-            descuento= True,
         )
-        
-        # Obtener la empresa y el descuento existentes
-        customer = Customer.get(Customer.email == request_customer.email)
-        discount = Discount.get(Discount.id == id)
-
-
-        CustomerDiscount.create(
-            customer= customer,
-            company= discount.company,
-            descuento= discount.id,
-            fecha_inicio = date.today(),
-            fecha_fin = request_customer.fecha_fin,           
-        )
-
-        Enviar_Qr.send_email(request_customer.email)
 
         return {"message": "Cliente creado y asociado con éxito"}
-
-    except Company.DoesNotExist:
-        raise HTTPException(status_code=404, detail="La empresa no existe")
-
-    except IntegrityError as e:
-        raise HTTPException(status_code=400, detail=f"Error de integridad de la base de datos: {str(e)}")
-
-    except OperationalError as e:
-        raise HTTPException(status_code=500, detail=f"Error de operación de base de datos: {str(e)}")
-
-async def create_discount(id, email, fecha_fin):
-
-    try:
-        
-                # Verificar si el correo electrónico ya está en uso
-        if not Customer.select().where(Customer.email == email).exists():
-            raise HTTPException(status_code=400, detail="El cliente no existe")
-        
-        if not Discount.select().where(Discount.id == id).exists():
-            raise HTTPException(status_code=404, detail="El descuento no existe")
-        
-        
-        # Obtener la empresa y el descuento existentes
-        customer = Customer.get(Customer.email == email)
-        discount = Discount.get(Discount.id == id)
-
-        customer.descuento = True
-        customer.save()  # Guardar el cambio en la base de datos
-
-        CustomerDiscount.create(
-            customer=customer,
-            company=discount.company,
-            descuento=discount.id,
-            fecha_inicio = date.today(),
-            fecha_fin = fecha_fin
-        )
-
-        Enviar_Qr.send_email(email)
-
-        return {"message": "Descuento asociado con éxito"}
 
     except Company.DoesNotExist:
         raise HTTPException(status_code=404, detail="La empresa no existe")

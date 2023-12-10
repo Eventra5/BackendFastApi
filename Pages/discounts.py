@@ -2,8 +2,6 @@ from database import Discount, Company
 
 from peewee import DoesNotExist
 
-from schemas import DiscountCreate
-
 from fastapi import HTTPException
 
 async def get_discount(id):
@@ -13,9 +11,10 @@ async def get_discount(id):
         discounts = Discount.select().where(Discount.id == id)
 
         # Convierte los resultados en una lista de diccionarios
-        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage} for discount in discounts]
+        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage, "costo": discount.costo} for discount in discounts]
 
         return discounts_list
+    
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="El descuento no existe.")
     except Exception as e:
@@ -32,9 +31,10 @@ async def get_discount_name(company_name: str):
         discounts = Discount.select().where(Discount.company == company)
 
         # Convierte los resultados en una lista de diccionarios
-        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage} for discount in discounts]
+        discounts_list = [{"id": discount.id, "company": discount.company.name, "percentage": discount.percentage, "costo": discount.costo} for discount in discounts]
 
         return discounts_list
+    
     except DoesNotExist:
         raise HTTPException(status_code=404, detail="La empresa no existe.")
     except Exception as e:
@@ -49,12 +49,13 @@ async def get_all_discounts():
         {
             "id": discount.id,
             "company_name": discount.company.name,
-            "percentage": discount.percentage
+            "percentage": discount.percentage,
+            "costo": discount.costo
         }
         for discount in discount_info
     ]
 
-async def create_discount(discount: DiscountCreate, company_name: str):
+async def create_discount(discount, company_name):
     # Validar los datos de entrada utilizando Pydantic
     discount_data = discount.dict()
     
@@ -76,4 +77,4 @@ async def delete_discount(id):
         discount.delete_instance()
         return {"mensaje": "Descuento eliminado con exito"}
     else:
-        raise HTTPException(status_code=404, detail="El usuario no existe")
+        raise HTTPException(status_code=404, detail="El descuento no existe")

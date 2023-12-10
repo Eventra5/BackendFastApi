@@ -37,7 +37,6 @@ async def get_all_companies():
     
 async def create_company(company_request: CompanyCreate):
 
-
     if Company.select().where(Company.name == company_request.name).exists():
         raise HTTPException(status_code=400, detail="La empresa ya esta registrada")
 

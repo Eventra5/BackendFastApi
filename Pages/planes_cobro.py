@@ -7,7 +7,7 @@ from peewee import DoesNotExist
 from database import DB 
 
 async def get_plan(plan_name):
-    plan = PlanesCobro.get_or_none(PlanesCobro.name == plan_name)
+    plan = PlanesCobro.get_or_none(PlanesCobro.plan == plan_name)
 
     if plan:
         return plan.__dict__["__data__"]

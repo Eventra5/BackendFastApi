@@ -46,6 +46,8 @@ class Discount(Model):
     id = AutoField()
     company = ForeignKeyField(Company, backref='discount_company', column_name='company_name', to_field='name')
     percentage = FloatField()
+    costo = FloatField()
+
 
     def __str__(self):
         return self.company
@@ -59,7 +61,7 @@ class Customer(Model):
     name = CharField(max_length=100)
     last_name = CharField(max_length=100)
     email = CharField(max_length=100, unique=True)
-    descuento = BooleanField(default=True)
+    descuento = BooleanField(default=False)
 
 
     def __str__(self):
@@ -71,7 +73,7 @@ class Customer(Model):
 
 class CustomerDiscount(Model):
     
-    customer = ForeignKeyField(Customer, backref='customer_companies', column_name='customer_email', to_field='email')
+    customer = ForeignKeyField(Customer, backref='customer_companies', column_name='customer_email', to_field='email', unique=True)
     company = ForeignKeyField(Company, backref='company_customers', column_name='company_name', to_field='name')
     descuento = ForeignKeyField(Discount)
     fecha_inicio = DateField()

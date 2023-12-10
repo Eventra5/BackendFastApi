@@ -8,7 +8,7 @@ from database import DB as connection
 from database import User, Company, Discount, Customer, CustomerDiscount, AperturaCaja, CierreCaja, Transacciones, PlanesCobro, InfoCompanyWeb, InfoCompanyLegal
 from database import create_database
 
-from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate, MyCompanyCreate, InfoCompanyCreate
+from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate, MyCompanyCreate, InfoCompanyCreate, SuscripcioCreate
 from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
 
 import Pages.users as user_page
@@ -20,6 +20,9 @@ import Pages.caja as caja_page
 import Pages.planes_cobro as plan_page
 import Pages.transaciones as transacciones_page
 import Pages.config_company as cc_page
+
+import Pages.cobros as cobros_page
+
 
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -147,7 +150,7 @@ async def delete_discount(id: int):
 #endregion
 
 #Peticiones para los clientes
-#region client
+#region cliente
 
 @app.get("/customer/{email}", tags=["Customer"])
 async def get_customer(email: str):
@@ -157,13 +160,9 @@ async def get_customer(email: str):
 async def get_all_customers():
     return await customer_page.get_all_customers()
 
-@app.post("/customer/{company}", tags=["Customer"])
-async def create_customer(request_customer: CustomerCreate, id: int):
-    return await customer_page.create_customer(request_customer, id)
-
-@app.post("/customer-discount/{id}", tags=["Customer"])
-async def create_customer(id: int, email: str, fecha_fin: str):
-    return await customer_page.create_discount(id, email, fecha_fin)
+@app.post("/customer/", tags=["Customer"])
+async def create_customer(request_customer: CustomerCreate):
+    return await customer_page.create_customer(request_customer)
 
 @app.delete("/customer/{email}", tags=["Customer"])
 async def delete_customer(email: str):
@@ -190,6 +189,10 @@ async def cerrar_caja(username: str):
 async def transaccion(transaccion_data: TransaccionCreate, plan: str, email: Optional[str] = None):
     return transacciones_page.crear_transaccion(transaccion_data, plan, email)
 
+@app.post("/transaccion/suscripcion/{id}", tags=["Transacciones"])
+async def transaccion(transaccion_data: SuscripcioCreate, id: int, email:str):
+    return transacciones_page.transaccion_suscripcion(transaccion_data, id, email)
+
 #endregion
 
 #Peticiones para configurar los planes de cobro
@@ -213,7 +216,8 @@ async def delete_plan(plan_name: str):
 
 #endregion
 
-#Peticions para configurar la empresa
+#Peticions para configurar la empresa web
+#region 
 
 @app.get("/config-web", tags=["Config Web"])
 async def get_web():
@@ -231,6 +235,10 @@ async def update_web(request_company: MyCompanyCreate, id: int):
 async def delete_web(id: int):
     return await cc_page.delete_info_web(id)
 
+#endregion
+
+#Peticions para configurar la empresa web
+#region 
 
 @app.get("/config-company", tags=["Config company"])
 async def get_company():
@@ -247,6 +255,9 @@ async def update_company(request_company: InfoCompanyCreate, id: int):
 @app.delete("/config-company/{id}", tags=["Config company"])
 async def delete_company(id: int):
     return await cc_page.delete_info_legal(id)
+
+#endregion 
+
 
 #env\scripts\activate.bat
 #uvicorn main:app --reload

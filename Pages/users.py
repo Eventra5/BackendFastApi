@@ -55,7 +55,7 @@ async def get_user(username):
 async def get_all_users():
     users = list(User.select())
 
-    return [{"cp": user.id, "name": user.name, "email": user.email, "username": user.username, "password": user.password} for user in users]
+    return [{"id": user.id, "name": user.name, "email": user.email, "username": user.username, "password": user.password} for user in users]
 
 async def create_user(user_request):
 
@@ -106,4 +106,3 @@ async def delete_user(username, password):
         return {"mensaje": f"Usuario '{username}' eliminado exitosamente"}
     else:
         raise HTTPException(status_code=404, detail="El usuario no existe")
-

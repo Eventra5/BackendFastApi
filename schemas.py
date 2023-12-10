@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field
-from datetime import date
+from datetime import date, datetime
 
 #region Usuarios
 class UsuarioBase(BaseModel):
@@ -40,6 +40,7 @@ class CompanyResponse(BaseModel):
 #region Descuentos
 class DiscountBase(BaseModel):
     percentage: float = Field(..., gt=0, le=100)  # Porcentaje entre 0 y 100
+    costo: float
 
 class DiscountCreate(DiscountBase):
     pass
@@ -48,12 +49,10 @@ class DiscountCreate(DiscountBase):
 
 #region clientes
 
-    
 class CustomerBase(BaseModel):
     name: str
     last_name: str
     email: EmailStr
-    fecha_fin: str
 
 class CustomerCreate(CustomerBase):
     pass
@@ -76,6 +75,7 @@ class CustomerCompanyCreate(CustomerBase_company):
 
 class CustomerCompany(CustomerBase_company):
     id: int
+
 #endregion
 
 #region Login
@@ -91,10 +91,30 @@ class AbrirCajaBase(BaseModel):
     cantidad_inicial: float
     username: str
 
-
 class CrearCaja(AbrirCajaBase):
     pass
 
+#endregion
+
+
+#region suscripciones
+
+class SuscripcionBase(BaseModel):
+    username: str
+    fecha_fin: str
+
+class SuscripcioCreate(SuscripcionBase):
+    pass
+
+class Suscripcio(SuscripcionBase):
+    id: int
+    monto: float
+    transaccion: str
+
+
+#endregion
+
+#region transacciones
 
 class TransaccionBase(BaseModel):
     transaccion: str
@@ -109,6 +129,8 @@ class Transaccion(TransaccionBase):
     monto: float
 
 #endregion
+
+
 
 #region Planes
 class PlanesBase(BaseModel):

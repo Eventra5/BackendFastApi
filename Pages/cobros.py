@@ -1,6 +1,6 @@
 from typing import Optional
 
-from database import PlanesCobro
+from database import PlanesCobro, Discount
 
 from fastapi import HTTPException
 
@@ -10,7 +10,7 @@ def cobro_fraccion(fecha_expedicion: str, plan_name: str, descuento: Optional[fl
 
     try:
         
-        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        plan_info = PlanesCobro.get(PlanesCobro.plan == plan_name)
         costo_base = plan_info.cobro_base
         costo_hora = plan_info.aumento
 
@@ -35,7 +35,7 @@ def cobro_fraccion(fecha_expedicion: str, plan_name: str, descuento: Optional[fl
         costo = round(costo_base, 2)
         return costo
 
-    except Planes_cobro.DoesNotExist as e:
+    except PlanesCobro.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
     except ValueError as e:
@@ -47,7 +47,7 @@ def cobro_hora(fecha_expedicion: str, plan_name: str, descuento: Optional[float]
 
     try:
         
-        plan_info = Planes_cobro.get(Planes_cobro.plan == plan_name)
+        plan_info = PlanesCobro.get(PlanesCobro.plan == plan_name)
         costo_base = plan_info.cobro_base
         aumento = plan_info.aumento
 
@@ -69,7 +69,7 @@ def cobro_hora(fecha_expedicion: str, plan_name: str, descuento: Optional[float]
         costo = round(costo_base, 2)
         return costo
     
-    except Planes_cobro.DoesNotExist as e:
+    except PlanesCobro.DoesNotExist as e:
         raise HTTPException(status_code=404, detail=f"El plan '{plan_name}' no fue encontrado")
     
     except ValueError as e:
@@ -87,7 +87,7 @@ def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] 
         aumento = plan_info.aumento
 
         fecha_expedicion = datetime.strptime(fecha_expedicion, "%Y-%m-%d %H:%M:%S")
-
+        print(fecha_expedicion)
         # Obtener la fecha y hora actuales del sistema
         now = datetime.now()
 
@@ -106,6 +106,8 @@ def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] 
             costo_base -= (costo_base * descuento) / 100  # Aplicar el descuento
 
         costo = round(costo_base, 2)
+
+        print(costo)
         return costo    
 
     except PlanesCobro.DoesNotExist as e:
@@ -116,8 +118,27 @@ def cobro_dia(fecha_expedicion: str, plan_name: str, descuento: Optional[float] 
     except Exception as e:
         return {"error": str(e)}  # Capturar y manejar otros errores
 
+def suscripcion(id: int):
+    try:
+
+        # Verificar si existe el descuento con el ID dado
+        if not Discount.select().where(Discount.id == id).exists():
+            raise HTTPException(status_code=404, detail=f"El descuento con ID {id} no existe")
+        
+        # Obtener el descuento por su ID
+        discount = Discount.get(Discount.id == id)
+        
+        costo = discount.costo
+        print(costo)
+        return costo
+
+    except Discount.DoesNotExist as e:
+        raise HTTPException(status_code=404, detail=f"El descuento con ID {id} no fue encontrado")
+
+
 funciones_por_plan = {
     "hora": cobro_hora,
     "fraccion": cobro_fraccion,
     "dia": cobro_dia,
+    "suscripcion": suscripcion,
 }
