@@ -9,7 +9,7 @@ from database import User, Company, Discount, Customer, CustomerDiscount, Apertu
 from database import create_database
 
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate, MyCompanyCreate, InfoCompanyCreate, SuscripcioCreate
-from schemas import UsuarioBase, DiscountBase, AbrirCajaBase
+from schemas import UsuarioBase, DiscountBase, AbrirCajaBase, UserLogin
 
 import Pages.users as user_page
 import Pages.companys as company_page
@@ -75,6 +75,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 @app.post('/login', tags=["Login"])
 async def login(request_login: OAuth2PasswordRequestForm = Depends()):
     return await login_page.login_user(request_login)
+
+@app.post('/login2', tags=["Login"])
+async def login(request_login: UserLogin):
+    return await login_page.login_user2(request_login)
     
 #endregion
 
