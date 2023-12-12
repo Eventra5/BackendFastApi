@@ -50,6 +50,7 @@ async def get_info_legal():
 
     return [
         {
+            "id": company.id, 
             "cp": company.cp, 
             "rfc": company.rfc,
             "tel": company.tel,
