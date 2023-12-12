@@ -49,7 +49,7 @@ async def get_customer_companies(customer_email: str):
 async def get_all_customers():
     customer = list(Customer.select())
 
-    return [{"id": customer.id, "name": customer.name, "last name": customer.last_name, "email": customer.email} for customer in customer]
+    return [{"id": customer.id, "name": customer.name, "last name": customer.last_name, "email": customer.email, "descuento": customer.descuento} for customer in customer]
 
 async def create_customer(request_customer):
 

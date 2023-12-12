@@ -96,6 +96,16 @@ class CrearCaja(AbrirCajaBase):
 
 #endregion
 
+#region Cerrar caja
+
+class CerrarCajaBase(BaseModel):
+    cantidad_inicial: float
+    ingresos: float
+
+class CerrarCaja(CerrarCajaBase):
+    pass
+
+#endregion
 
 #region suscripciones
 

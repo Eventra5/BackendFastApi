@@ -9,7 +9,7 @@ from database import User, Company, Discount, Customer, CustomerDiscount, Apertu
 from database import create_database
 
 from schemas import CompanyResponse, UsuarioCreate, CompanyCreate, DiscountCreate, CustomerCreate, TransaccionCreate, PlanesCreate, MyCompanyCreate, InfoCompanyCreate, SuscripcioCreate
-from schemas import UsuarioBase, DiscountBase, AbrirCajaBase, UserLogin
+from schemas import UsuarioBase, DiscountBase, AbrirCajaBase, UserLogin, CerrarCaja
 
 import Pages.users as user_page
 import Pages.companys as company_page
@@ -182,12 +182,33 @@ async def abrir_caja(request_caja: AbrirCajaBase):
     return await caja_page.abrir_caja(request_caja)
 
 @app.post("/cerrar-caja/", tags=["Caja"])
-async def cerrar_caja(username: str):
-    return await caja_page.cerrar_caja(username)
+async def cerrar_caja(request_caja: CerrarCaja, username: str):
+    return await caja_page.cerrar_caja(request_caja, username)
 
 #endregion 
 
 #region transacciones
+
+@app.get("/transacciones", tags=["Transacciones"])
+async def get_all_transacciones():
+    return transacciones_page.get_all_transacciones()
+
+@app.get("/transacciones/name", tags=["Transacciones"])
+async def get_transacciones_name(name:str):
+    return transacciones_page.get_transaccion_name(name)
+
+@app.get("/transacciones/username", tags=["Transacciones"])
+async def get_transacciones_username(username:str):
+    return transacciones_page.get_transaccion_username(username)
+
+@app.get("/transacciones/id", tags=["Transacciones"])
+async def get_transacciones_id(id:int):
+    return transacciones_page.get_transaccion_id(id)
+
+@app.get("/transacciones/date", tags=["Transacciones"])
+async def get_transacciones_date(start_date:str, end_date:str):
+    return transacciones_page.get_transacciones_date(start_date, end_date)
+
 
 @app.post("/transaccion", tags=["Transacciones"])
 async def transaccion(transaccion_data: TransaccionCreate, plan: str, email: Optional[str] = None):

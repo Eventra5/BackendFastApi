@@ -97,7 +97,11 @@ class AperturaCaja(Model):
 class CierreCaja(Model):
     id = AutoField()
     cantidad_final = FloatField()
-    diferencia = FloatField()
+    ingresos = FloatField()
+    suscripciones = FloatField()
+    dia = FloatField()
+    hora = FloatField()
+    fraccion = FloatField()
     usuario_cierre = ForeignKeyField(User, backref='cierres_de_caja', column_name='usuario_cierre', to_field='username')
     apertura_caja = ForeignKeyField(AperturaCaja, backref='cierres_de_caja', null=True)
     fecha = DateTimeField()

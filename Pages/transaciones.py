@@ -1,5 +1,5 @@
 from database import AperturaCaja, CierreCaja ,Transacciones, CustomerDiscount, Customer, User, Discount
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from fastapi import HTTPException
 import Pages.cobros as cobros
 
@@ -46,6 +46,74 @@ def obtener_id_apertura_caja():
     except AperturaCaja.DoesNotExist:
         return None  # No se encontró una apertura de caja sin cierre
 
+def get_all_transacciones():
+
+    transaccion_info = list(Transacciones.select())
+
+    return [
+        {
+            "fecha": transaccion.fecha,
+            "transaccion": transaccion.transaccion,
+            "user": transaccion.user.username,
+            "monto": transaccion.monto,
+            "apertura_caja": transaccion.apertura_caja.id,
+
+        } 
+
+        for transaccion in transaccion_info]
+
+def get_transaccion_name(name):
+    transaccion_info = Transacciones.select().where(Transacciones.transaccion == name)
+
+    if transaccion_info:
+        return [trans.__dict__["__data__"] for trans in transaccion_info]
+    else:
+        raise HTTPException(status_code=404, detail=f"El nombre del cobro: '{name}' no fue encontrado")
+
+def get_transaccion_username(username):
+    transaccion_info = Transacciones.select().where(Transacciones.user == username)
+
+    if transaccion_info:
+        return [trans.__dict__["__data__"] for trans in transaccion_info]
+    else:
+        raise HTTPException(status_code=404, detail=f"El usuario: '{username}' no fue encontrado")
+
+def get_transaccion_username(username):
+    transaccion_info = Transacciones.select().where(Transacciones.user == username)
+
+    if transaccion_info:
+        return [trans.__dict__["__data__"] for trans in transaccion_info]
+    else:
+        raise HTTPException(status_code=404, detail=f"El usuario: '{username}' no fue encontrado")
+    
+def get_transaccion_id(id):
+    transaccion_info = Transacciones.select().where(Transacciones.apertura_caja == id)
+
+    if transaccion_info:
+        return [trans.__dict__["__data__"] for trans in transaccion_info]
+    else:
+        raise HTTPException(status_code=404, detail=f"El id: '{id}' de la apertura de caja no fue encontrado")
+    
+def get_transacciones_date(start_date, end_date):
+
+    try:
+        # Convertir las fechas de cadena a objetos datetime si es necesario
+        start_date = datetime.strptime(start_date, "%Y-%m-%d")
+        end_date = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1) - timedelta(seconds=1)
+
+        # Filtrar las transacciones dentro del rango de fechas
+        transacciones_info = Transacciones.select().where(
+            (Transacciones.fecha >= start_date) & (Transacciones.fecha <= end_date)
+        )
+
+        if transacciones_info:
+            return [trans.__dict__["__data__"] for trans in transacciones_info]
+        else:
+            raise HTTPException(status_code=404, detail="No se encontraron transacciones en el rango de fechas proporcionado")
+
+    except ValueError:
+        raise HTTPException(status_code=400, detail="El formato de las fechas es incorrecto. Se espera 'YYYY-MM-DD'")
+    
 def num_transacciones(cierre_id):
     # Buscar el rango de transacciones utilizando el ID de cierre de caja
     num_transacciones = Transacciones.select().join(CierreCaja, on=(Transacciones.apertura_caja == CierreCaja.apertura_caja)).where(CierreCaja.id == cierre_id).count()
@@ -106,7 +174,12 @@ def transaccion_suscripcion(transaccion_data, id, email):
         
         if not Customer.select().where(Customer.email == email).exists():
             raise HTTPException(status_code=404, detail="El cliente no existe")
-        
+
+        customer = Customer.get(Customer.email == email)
+
+        if customer.descuento == True:
+            raise HTTPException(status_code=404, detail="El cliente ya tiene un descuento")
+
         if not User.select().where(User.username == transaccion_data.username).exists():
             raise HTTPException(status_code=404, detail="El usuario no existe")
         
@@ -130,8 +203,7 @@ def transaccion_suscripcion(transaccion_data, id, email):
             apertura_id=id_caja
         )
 
-        # Obtener la empresa y el descuento existentes
-        customer = Customer.get(Customer.email == email)
+        # Obtener la empresa y el descuento existente
         discount = Discount.get(Discount.id == id)
 
         customer.descuento = True
@@ -158,3 +230,4 @@ def transaccion_suscripcion(transaccion_data, id, email):
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+    
